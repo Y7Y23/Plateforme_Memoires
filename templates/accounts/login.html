@@ -1,0 +1,54 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Connexion – ISMS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+</head>
+
+<body class="login">
+
+  <div class="wrapper d-flex justify-content-center align-items-center" style="min-height:100vh;">
+    <div class="card shadow p-4" style="width:100%; max-width:400px;">
+
+      <h3 class="text-center mb-4">Connexion ISMS</h3>
+
+      {% if messages %}
+        {% for m in messages %}
+          <div class="alert alert-{{ m.tags }}">{{ m }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+          {{ form.email.label_tag }}
+          {{ form.email }}
+        </div>
+
+        <div class="mb-3">
+          {{ form.mot_de_pass.label_tag }}
+          {{ form.mot_de_pass }}
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">
+          Se connecter
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- JS (optionnel ici mais propre) -->
+  <script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
+  <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+
+</body>
+</html>

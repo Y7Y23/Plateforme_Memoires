@@ -1,0 +1,64 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{% block title %}Choisir l'année - ISMS{% endblock %}</title>
+
+  <!-- CSS (Kaiadmin/Bootstrap + tes styles) -->
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="container py-5">
+    {% block content %}
+    <h3 class="fw-bold mb-3">Choisir l'année universitaire</h3>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <form method="post" action="{% url 'gestion:annee_create_and_select' %}">
+          {% csrf_token %}
+          <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+              <label class="form-label">Créer une nouvelle année</label>
+              <input class="form-control" name="libelle" placeholder="2025-2026">
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-primary w-100">Créer & sélectionner</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-2">Années existantes</h5>
+        <table class="table">
+          <thead>
+            <tr><th>Libellé</th><th>Active</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+            <tr>
+              <td>{{ r.libelle }}</td>
+              <td>{% if r.active %}<span class="badge bg-success">Active</span>{% endif %}</td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-success"
+                   href="{% url 'gestion:annee_set_session' r.id_annee %}">
+                  Sélectionner
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endblock %}
+  </div>
+</body>
+</html>

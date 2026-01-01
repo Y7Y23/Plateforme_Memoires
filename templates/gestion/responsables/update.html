@@ -1,0 +1,60 @@
+{% extends "base_admin.html" %}
+{% block title %}Modifier Responsable{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Modifier Responsable</h3>
+  <a class="btn btn-light" href="{% url 'gestion:responsable_list' %}">← Retour</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Nom</label>
+          <input class="form-control" name="nom" value="{{ resp.nom }}" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Prénom</label>
+          <input class="form-control" name="prenom" value="{{ resp.prenom }}" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Email</label>
+          <input class="form-control" name="email" value="{{ resp.email }}" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Rôle</label>
+          <select class="form-select" name="id_role" required>
+            {% for ro in roles %}
+              <option value="{{ ro.id_role }}" {% if ro.id_role == resp.id_role %}selected{% endif %}>
+                {{ ro.code }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nouveau mot de passe (optionnel)</label>
+          <input class="form-control" name="mot_de_pass" placeholder="Laisser vide pour ne pas changer">
+        </div>
+
+        <div class="col-12">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin"
+                   {% if resp.is_admin %}checked{% endif %}>
+            <label class="form-check-label" for="is_admin">Accès admin</label>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary">Enregistrer</button>
+          <a class="btn btn-outline-secondary" href="{% url 'gestion:responsable_list' %}">Annuler</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

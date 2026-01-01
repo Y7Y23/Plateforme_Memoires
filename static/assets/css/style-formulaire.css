@@ -1,0 +1,190 @@
+/* formulaire */
+.formualaire-container {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2 {
+    text-align: left;
+    color: #333;
+}
+
+
+.question {
+    margin-bottom: 5px;
+    border: 1px solid #d5d5d5;
+    max-width: 70%;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+   
+}
+
+label {
+    display: inline-block;
+    margin-right: 20px;
+    font-size: 16px;
+    color: #444;
+}
+
+textarea {
+    width: 100%;
+    height: 120px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #d5d5d5;
+    font-size: 16px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+button.ajouter {
+    display: block;
+    width: 100px;
+    padding: 5px;
+    margin: 10px 40px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+
+/*width: 100px;padding: 3px; margin: 10px 40px;*/
+
+button:hover {
+    background-color: #45a049;
+}
+
+input[type="radio"] {
+    margin-right: 5px;
+}
+
+
+.question label {
+    margin-right: 30px;
+}
+
+
+/*ajouter une promotion */
+
+.ajouter-promotion-container{
+    text-align: center;
+    max-width: 80%;
+    font-family: Arial, sans-serif;
+    margin: auto;
+    padding: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.ajouter-promotion-container form{
+    text-align: center;
+}
+
+.ajouter-promotion-container button{
+    display: inline
+}
+
+.etudiants-table {
+    max-width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h3 {
+    background-color: rgb(81, 114, 180);
+    color: #ffffff;
+    text-align: left;
+    padding: 7px;
+    margin-left: 70px;
+    margin-top: 20px;
+    border-radius: 5px;
+    max-width: 150px;
+}
+
+.etudiants-table th {
+    padding: 12px;
+}
+
+.etudiants-table tbody tr {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+}
+
+.etudiants-table td {
+    padding: 12px;
+    text-align: left;
+}
+
+
+.etudiants-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+
+.etudiants-table tr:nth-child(odd) {
+    background-color: #f3f3f3;
+}
+
+/*Ajouter un seul etudiant */
+.seul-etudiant{
+    background-color: #ffffff;
+    border: 1px solid #d5d5d5;
+    border-radius: 5px;
+    max-width: 400px;
+    display: block;
+    margin: auto;
+    box-shadow: 0 2px 8px #333333;
+}
+
+.seul-etudiant input, select{
+    padding: 5px;
+    width: 350px;
+    margin-bottom: 10px;
+    border: 1px solid #d5d5d5;
+    border-radius: 10px;
+}
+
+.seul-etudiant input[type="submit"]{
+    color: #ffffff;
+    background-color:#45a049
+}
+
+/*end ajouter promotion */
+
+
+/*admin annee*/
+.admin-annee{
+    text-align: right;
+    margin-bottom: 10px
+}
+
+
+
+/* flashed messages */
+
+.success {
+    color: green;
+    text-align: center;
+    text-align: center;
+    list-style-type:none;
+    margin-left : -40px;
+}
+
+.error {
+    color: rgb(190, 71, 71);
+    text-align: center;
+    list-style-type:none;
+    margin-left : -40px;
+}
+

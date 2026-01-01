@@ -1,0 +1,28 @@
+{% extends "base_admin.html" %}
+{% block title %}Années{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="fw-bold">Années universitaires</h3>
+  <a class="btn btn-primary" href="{% url 'gestion:annee_create' %}">Ajouter</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table">
+      <thead><tr><th>Libellé</th><th>Active</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ r.libelle }}</td>
+          <td>{% if r.active %}<span class="badge bg-success">Oui</span>{% else %}Non{% endif %}</td>
+          <td class="d-flex gap-2">
+            <a class="btn btn-sm btn-outline-success" href="{% url 'gestion:annee_activate' r.id_annee %}">Activer</a>
+            <a class="btn btn-sm btn-outline-danger" href="{% url 'gestion:annee_delete' r.id_annee %}">Supprimer</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

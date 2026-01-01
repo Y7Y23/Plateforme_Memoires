@@ -1,0 +1,91 @@
+h1{
+    color:#345c3f;
+    background-color: white;
+    max-width: 400px;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: center;
+    margin: auto;
+}
+
+h4{
+    text-align: center;
+}
+
+table{
+    color:black;
+    background-color: white;
+    margin: 40px auto;
+    border: 1px solid #d5d5d5;
+}
+
+tr, td, th{
+    border-collapse: collapse;
+    padding: 10px;
+}
+
+/* annee universitaire */
+.admin-annee{
+    text-align: right;
+     margin-bottom: 10px
+}
+
+
+.downloadBtn {
+    background-color: #007BFF; 
+    color: white; 
+    border: none;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px; 
+    text-align: center; 
+    text-decoration: none; 
+    display: inline-block; 
+    font-size: 16px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: background-color 0.3s, transform 0.2s; 
+}
+
+.downloadBtn:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px); 
+}
+
+.downloadBtn:active {
+    transform: translateY(2px);
+}
+
+.downloadBtn:focus {
+    outline: none; 
+}
+
+/*charts */
+.radar, .histogramme{
+    margin-top: 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(51, 51, 51, 0.5);
+    position: relative;
+}
+
+
+
+
+/* flashed messages */
+
+.success {
+    color: green;
+    text-align: center;
+    text-align: center;
+    list-style-type:none;
+    margin-left : -40px;
+}
+
+.error {
+    color: rgb(190, 71, 71);
+    text-align: center;
+    list-style-type:none;
+    margin-left : -40px;
+}
+

@@ -1,0 +1,139 @@
+{% extends "base_admin.html" %}
+{% block title %}Mémoires{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Mémoires</h3>
+
+  <form method="get" class="d-flex gap-2">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Recherche (titre/étudiant/email)">
+    <select class="form-select" name="type">
+      <option value="">-- Type --</option>
+      {% for t in types %}
+        <option value="{{ t }}" {% if t == type_filtre %}selected{% endif %}>{{ t }}</option>
+      {% endfor %}
+    </select>
+    <select class="form-select" name="statut">
+      <option value="">-- Statut --</option>
+      {% for s in statuts %}
+        <option value="{{ s }}" {% if s == statut_filtre %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-primary">Filtrer</button>
+  </form>
+</div>
+
+<!-- CREATE -->
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Ajouter un mémoire</h5>
+
+    <form method="post" action="{% url 'gestion:memoire_create' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">Titre</label>
+          <input class="form-control" name="titre" required>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Type</label>
+          <select class="form-select" name="type" required>
+            {% for t in types %}
+              <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Statut</label>
+          <select class="form-select" name="statut">
+            {% for s in statuts %}
+              <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Étudiant</label>
+          <select class="form-select" name="id_etudiant" required>
+            <option value="">-- Choisir --</option>
+            {% for e in etudiants %}
+              <option value="{{ e.id_etudiant }}">{{ e.nom }} {{ e.prenom }} ({{ e.email }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">PDF (optionnel)</label>
+          <input type="file" class="form-control" name="fichier_pdf" accept="application/pdf">
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Description (optionnel)</label>
+          <textarea class="form-control" name="description" rows="3"></textarea>
+        </div>
+
+        <div class="col-md-4">
+          <button class="btn btn-primary w-100">Ajouter</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- LIST -->
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Titre</th>
+            <th>Étudiant</th>
+            <th>Type</th>
+            <th>Statut</th>
+            <th>Date dépôt</th>
+            <th>PDF</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td>{{ r.id_memoire }}</td>
+              <td>{{ r.titre }}</td>
+              <td>{{ r.nom }} {{ r.prenom }}</td>
+              <td><span class="badge bg-light text-dark">{{ r.type }}</span></td>
+              <td><span class="badge bg-secondary">{{ r.statut }}</span></td>
+              <td>{{ r.date_depot }}</td>
+              <td>{% if r.fichier_pdf %}
+                    <a href="/media/{{ r.fichier_pdf }}" target="_blank">Voir</a>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+              </td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{% url 'gestion:memoire_update' r.id_memoire %}">
+                  Modifier
+                </a>
+                <a class="btn btn-sm btn-outline-danger"
+                   href="{% url 'gestion:memoire_delete' r.id_memoire %}"
+                   onclick="return confirm('Supprimer ce mémoire ?');">
+                  Supprimer
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="8" class="text-center text-muted">Aucun mémoire</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

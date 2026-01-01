@@ -1,0 +1,218 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{% block title %}Administration - ISMS{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+<style>
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .sidebar-logo {
+    flex-shrink: 0;
+  }
+  
+  .sidebar-wrapper {
+    flex: 1;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    max-height: calc(100vh - 120px);
+  }
+  
+  /* Force le contenu à avoir une hauteur minimale pour activer le scroll */
+  .sidebar-wrapper .nav {
+    min-height: 110%;
+  }
+  
+  /* Personnaliser la scrollbar */
+  .sidebar-wrapper::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .sidebar-wrapper::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+  
+  .sidebar-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+  }
+  
+  .sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.6);
+  }
+</style>
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <!-- Sidebar -->
+    <div class="sidebar" data-background-color="dark">
+      <div class="sidebar-logo p-3">
+        <div class="text-white fw-bold">ISMS – Backoffice</div>
+
+        {% if request.session.annee_libelle %}
+          <small class="text-white-50 d-block">
+            Année: {{ request.session.annee_libelle }}
+          </small>
+          <a class="text-info small" href="{% url 'gestion:annee_select' %}">
+            Changer d’année
+          </a>
+        {% else %}
+          <a class="text-warning small" href="{% url 'gestion:annee_select' %}">
+            Sélectionner une année
+          </a>
+        {% endif %}
+      </div>
+
+      {% with current=request.resolver_match.url_name %}
+      <div class="sidebar-wrapper scrollbar-inner">
+        <ul class="nav nav-secondary">
+
+          <!-- Dashboard -->
+          <li class="nav-item {% if current == 'dashboard' %}active{% endif %}">
+            <a href="{% url 'gestion:dashboard' %}">
+              <i class="fas fa-home"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+
+          <!-- Référentiels -->
+          <li class="nav-section">
+            <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+            <h4 class="text-section">Référentiels</h4>
+          </li>
+
+          <li class="nav-item {% if current in 'annee_list annee_create annee_update annee_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:annee_list' %}">
+              <i class="fas fa-calendar-alt"></i>
+              <p>Années universitaires</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'departement_list departement_create departement_update departement_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:departement_list' %}">
+              <i class="fas fa-building"></i>
+              <p>Départements</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'niveau_list niveau_create niveau_update niveau_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:niveau_list' %}">
+              <i class="fas fa-layer-group"></i>
+              <p>Niveaux</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'salle_list salle_create salle_update salle_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:salle_list' %}">
+              <i class="fas fa-door-open"></i>
+              <p>Salles</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'role_list role_create role_update role_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:role_list' %}">
+              <i class="fas fa-id-badge"></i>
+              <p>Rôles</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'responsable_list responsable_create responsable_update responsable_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:responsable_list' %}">
+              <i class="fas fa-user-tie"></i>
+              <p>Responsables</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'etudiant_list etudiant_create etudiant_update etudiant_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:etudiant_list' %}">
+              <i class="fas fa-user-graduate"></i>
+              <p>Étudiants</p>
+            </a>
+          </li>
+
+          <!-- Métier -->
+          <li class="nav-section">
+            <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+            <h4 class="text-section">Cycle académique</h4>
+          </li>
+
+          <li class="nav-item {% if current in 'memoire_list memoire_create memoire_update memoire_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:memoire_list' %}">
+              <i class="fas fa-book"></i>
+              <p>Mémoires</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'soutenance_list soutenance_create soutenance_update soutenance_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:soutenance_list' %}">
+              <i class="fas fa-gavel"></i>
+              <p>Soutenances</p>
+            </a>
+          </li>
+
+          <li class="nav-item {% if current in 'encadrement_list encadrement_create encadrement_update encadrement_delete' %}active{% endif %}">
+            <a href="{% url 'gestion:encadrement_list' %}">
+              <i class="fas fa-user-check"></i>
+              <p>Encadrements</p>
+            </a>
+          </li>
+
+          <!-- Logout -->
+          <li class="nav-item mt-2">
+            <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link text-danger p-0">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </button>
+            </form>
+          </li>
+
+        </ul>
+      </div>
+      {% endwith %}
+    </div>
+
+    <!-- Main Panel -->
+    <div class="main-panel">
+      <div class="content">
+        <div class="page-inner">
+
+          {% if messages %}
+            {% for m in messages %}
+              <div class="alert alert-{{ m.tags }}">{{ m }}</div>
+            {% endfor %}
+          {% endif %}
+
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
+  <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'assets/js/kaiadmin.min.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

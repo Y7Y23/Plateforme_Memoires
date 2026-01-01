@@ -1,0 +1,59 @@
+{% extends "base_admin.html" %}
+{% block title %}Étudiants{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Étudiants</h3>
+
+  <form method="get" class="d-flex gap-2">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Recherche nom/email...">
+    <button class="btn btn-outline-primary">OK</button>
+  </form>
+</div>
+
+<!-- CREATE -->
+<form method="post" action="{% url 'gestion:etudiant_create' %}" class="card card-body mb-3">
+  {% csrf_token %}
+  <div class="row g-2">
+    <div class="col-md-3"><input class="form-control" name="nom" placeholder="Nom" required></div>
+    <div class="col-md-3"><input class="form-control" name="prenom" placeholder="Prénom" required></div>
+    <div class="col-md-3"><input class="form-control" name="email" placeholder="Email" required></div>
+    <div class="col-md-2"><input class="form-control" name="mot_de_pass" placeholder="Mot de passe" required></div>
+    <div class="col-md-1"><button class="btn btn-primary w-100">+</button></div>
+  </div>
+</form>
+
+<!-- LIST -->
+<div class="card">
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr><th>#</th><th>Nom</th><th>Prénom</th><th>Email</th><th class="text-end">Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>{{ r.id_etudiant }}</td>
+            <td>{{ r.nom }}</td>
+            <td>{{ r.prenom }}</td>
+            <td>{{ r.email }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary"
+                 href="{% url 'gestion:etudiant_update' r.id_etudiant %}">
+                Modifier
+              </a>
+              <a class="btn btn-sm btn-outline-danger"
+                 href="{% url 'gestion:etudiant_delete' r.id_etudiant %}"
+                 onclick="return confirm('Supprimer cet étudiant ?');">
+                Supprimer
+              </a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">Aucun étudiant</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

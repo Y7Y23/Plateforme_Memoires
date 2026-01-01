@@ -1,0 +1,28 @@
+{% extends "base_admin.html" %}
+{% block title %}Modifier Niveau{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Modifier Niveau</h3>
+  <a class="btn btn-light" href="{% url 'gestion:niveau_list' %}">← Retour</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label">Libellé</label>
+          <input class="form-control" name="libelle" value="{{ niveau.libelle }}" required>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary">Enregistrer</button>
+          <a class="btn btn-outline-secondary" href="{% url 'gestion:niveau_list' %}">Annuler</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

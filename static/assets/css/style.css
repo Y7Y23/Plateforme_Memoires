@@ -1,0 +1,269 @@
+/* Les cours */
+
+#miniteur{
+    color: #FFF;
+    background-color: #333;
+    padding: 7px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    max-width: 200px;
+    font-weight: bold;
+}
+
+.terminee{
+    color: #333333;
+    font-weight: bold;
+    margin-top: 15%;
+    margin-left: 20%;
+}
+
+p:has(strong#timer){
+    background-color: rgb(64, 53, 119);
+    color: white;
+    padding: 5px;
+    width: 200px;
+    border-radius: 5px;
+    font-weight: bold
+}
+
+
+.cours-table {
+    max-width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    margin: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cours-table thead {
+    background-color: #4CAF50;
+    color: white;
+    text-align: left;
+}
+
+.cours-table th {
+    padding: 12px;
+    color: #333333;
+    
+}
+
+.cours-table tbody tr {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #ddd;
+}
+
+.cours-table td {
+    padding: 12px;
+    text-align: left;
+}
+
+
+.cours-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+
+.cours-table tbody tr:nth-child(odd) {
+    background-color: #f3f3f3;
+}
+
+
+.cours-table {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+
+.button_remplire  {
+    text-decoration: none;
+    background-color: white;
+    color: #333;
+    font-weight: bold;
+    border-radius: 5px;
+    padding: 5px;
+    border: 1px solid #333333
+}
+
+.button_remplire a {
+    text-decoration: none;
+    color: #333;
+}
+
+.button_remplire :hover{
+    color: green;
+}
+
+button.disabled {
+    pointer-events: none;
+    background-color: rgb(20, 113, 20);
+    color: white;
+    width: 100%;
+    border: 1px solid #ffffff
+}
+
+h2{
+margin : 0px auto 10px;
+width: 300px;
+text-align: center;
+background-color: white;
+color : #333;
+padding: 5px;
+border-radius: 10px;
+}
+
+
+/*profile */
+
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+.profile-sub-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+    margin-bottom: 30px;
+}
+
+#image{
+    border-radius: 50%; 
+    border: 1px solid #919090; 
+    cursor: pointer; 
+    display: block;
+    margin:  15px auto;
+    box-shadow: 0 6px 6px #c2c2c2;
+    
+}
+
+#image-file{
+    display: none;
+}
+
+.img-button{
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: block;
+    margin: auto;
+}
+
+.nom_prenom {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.info-item {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.info-item strong {
+    font-weight: bold;
+    color: #333333;
+}
+
+.info-item span {
+    color: #555;
+}
+
+
+
+/* changer-mot-de-pass */
+.changer-mot-de-pass-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.changer-mot-de-pass-container h2 {
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    color: #555;
+}
+
+.mot-de-pass{
+    position: relative
+}
+
+.eye-icon{
+    position: absolute;
+    right: 10px;
+    top: 60%;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #45a049;
+}
+
+
+
+/* flashed messages */
+
+.success {
+    color: green;
+    text-align: center;
+    text-align: center;
+    list-style-type:none;
+    margin-left : -40px;
+}
+
+.error {
+    color: rgb(190, 71, 71);
+    text-align: center;
+    list-style-type:none;
+    margin-left : -40px;
+}

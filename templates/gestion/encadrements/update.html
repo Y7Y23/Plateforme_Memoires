@@ -1,0 +1,68 @@
+{% extends "base_admin.html" %}
+{% block title %}Modifier Encadrement{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Modifier Encadrement</h3>
+  <a class="btn btn-light" href="{% url 'gestion:encadrement_list' %}">← Retour</a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="mb-2">Actuel</h5>
+    <div><strong>Mémoire :</strong> {{ enc.m_titre }} ({{ enc.m_type }} / {{ enc.m_statut }})</div>
+    <div><strong>Étudiant :</strong> {{ enc.e_nom }} {{ enc.e_prenom }} ({{ enc.e_email }})</div>
+    <div><strong>Encadrant :</strong> {{ enc.r_nom }} {{ enc.r_prenom }} ({{ enc.r_email }})</div>
+    <div class="mt-2"><span class="badge bg-secondary">{{ enc.old_encadrement }}</span></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Modifier</h5>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+
+        <div class="col-md-5">
+          <label class="form-label">Mémoire (année active)</label>
+          <select class="form-select" name="id_memoire" required>
+            {% for m in memoires %}
+              <option value="{{ m.id_memoire }}" {% if m.id_memoire == old_id_memoire %}selected{% endif %}>
+                #{{ m.id_memoire }} - {{ m.titre }} ({{ m.type }}, {{ m.statut }}) — {{ m.e_nom }} {{ m.e_prenom }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-5">
+          <label class="form-label">Encadrant (responsable)</label>
+          <select class="form-select" name="id_responsable" required>
+            {% for r in responsables %}
+              <option value="{{ r.id_responsable }}" {% if r.id_responsable == old_id_responsable %}selected{% endif %}>
+                {{ r.nom }} {{ r.prenom }} ({{ r.email }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Type</label>
+          <select class="form-select" name="encadrement" required>
+            {% for t in enc_types %}
+              <option value="{{ t }}" {% if t == enc.old_encadrement %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary">Enregistrer</button>
+          <a class="btn btn-outline-secondary" href="{% url 'gestion:encadrement_list' %}">Annuler</a>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

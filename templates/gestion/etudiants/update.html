@@ -1,0 +1,41 @@
+{% extends "base_admin.html" %}
+{% block title %}Modifier Étudiant{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Modifier Étudiant</h3>
+  <a class="btn btn-light" href="{% url 'gestion:etudiant_list' %}">← Retour</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Nom</label>
+          <input class="form-control" name="nom" value="{{ etu.nom }}" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Prénom</label>
+          <input class="form-control" name="prenom" value="{{ etu.prenom }}" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Email</label>
+          <input class="form-control" name="email" value="{{ etu.email }}" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nouveau mot de passe (optionnel)</label>
+          <input class="form-control" name="mot_de_pass" placeholder="Laisser vide pour ne pas changer">
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary">Enregistrer</button>
+          <a class="btn btn-outline-secondary" href="{% url 'gestion:etudiant_list' %}">Annuler</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

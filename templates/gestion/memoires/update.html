@@ -1,0 +1,72 @@
+{% extends "base_admin.html" %}
+{% block title %}Modifier Mémoire{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Modifier Mémoire</h3>
+  <a class="btn btn-light" href="{% url 'gestion:memoire_list' %}">← Retour</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+
+        <div class="col-md-6">
+          <label class="form-label">Titre</label>
+          <input class="form-control" name="titre" value="{{ mem.titre }}" required>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Type</label>
+          <select class="form-select" name="type" required>
+            {% for t in types %}
+              <option value="{{ t }}" {% if t == mem.type %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Statut</label>
+          <select class="form-select" name="statut" required>
+            {% for s in statuts %}
+              <option value="{{ s }}" {% if s == mem.statut %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Étudiant</label>
+          <select class="form-select" name="id_etudiant" required>
+            {% for e in etudiants %}
+              <option value="{{ e.id_etudiant }}" {% if e.id_etudiant == mem.id_etudiant %}selected{% endif %}>
+                {{ e.nom }} {{ e.prenom }} ({{ e.email }})
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Nouveau PDF (optionnel)</label>
+          <input type="file" class="form-control" name="fichier_pdf" accept="application/pdf">
+          {% if mem.fichier_pdf %}
+            <small class="text-muted d-block mt-1">Actuel: {{ mem.fichier_pdf }}</small>
+          {% endif %}
+        </div>
+
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          <textarea class="form-control" name="description" rows="4">{{ mem.description }}</textarea>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary">Enregistrer</button>
+          <a class="btn btn-outline-secondary" href="{% url 'gestion:memoire_list' %}">Annuler</a>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Responsables{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Responsables</h3>
+</div>
+
+<!-- CREATE RESPONSABLE -->
+<div class="card mb-4">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Ajouter un responsable</h5>
+
+    <form method="post" action="{% url 'gestion:responsable_create' %}">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Nom</label>
+          <input class="form-control" name="nom" required>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Prénom</label>
+          <input class="form-control" name="prenom" required>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email" required>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Mot de passe</label>
+          <input type="password" class="form-control" name="mot_de_pass" required>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Rôle</label>
+          <select class="form-select" name="id_role" required>
+            <option value="">-- Choisir --</option>
+            {% for ro in roles %}
+              <option value="{{ ro.id_role }}">{{ ro.code }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-center">
+          <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+            <label class="form-check-label" for="is_admin">
+              Accès administrateur
+            </label>
+          </div>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-primary w-100">Ajouter</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- LIST RESPONSABLES -->
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title mb-3">Liste des responsables</h5>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Admin</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for r in rows %}
+            <tr>
+              <td>{{ r.id_responsable }}</td>
+              <td>{{ r.nom }} {{ r.prenom }}</td>
+              <td>{{ r.email }}</td>
+              <td><span class="badge bg-secondary">{{ r.role_code }}</span></td>
+              <td>
+                {% if r.is_admin %}
+                  <span class="badge bg-success">Oui</span>
+                {% else %}
+                  <span class="badge bg-light text-dark">Non</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary"
+                   href="{% url 'gestion:responsable_update' r.id_responsable %}">
+                  Modifier
+                </a>
+
+                <a class="btn btn-sm btn-outline-warning"
+                   href="{% url 'gestion:responsable_toggle_admin' r.id_responsable %}">
+                  Admin
+                </a>
+
+                <a class="btn btn-sm btn-outline-danger"
+                   href="{% url 'gestion:responsable_delete' r.id_responsable %}"
+                   onclick="return confirm('Supprimer ce responsable ?');">
+                  Supprimer
+                </a>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="6" class="text-center text-muted">Aucun responsable trouvé</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

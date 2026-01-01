@@ -1,0 +1,35 @@
+{% extends "base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h3 class="fw-bold mb-3">Dashboard SuperAdmin</h3>
+
+<div class="row">
+  <div class="col-md-4">
+    <div class="card card-stats card-round">
+      <div class="card-body">
+        <p class="card-category">Étudiants</p>
+        <h4 class="card-title">{{ nb_etudiants }}</h4>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card card-stats card-round">
+      <div class="card-body">
+        <p class="card-category">Responsables</p>
+        <h4 class="card-title">{{ nb_responsables }}</h4>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="mb-2">Mémoires par statut</h5>
+    <ul>
+      {% for statut,total in mem_stats %}
+        <li>{{ statut }} : {{ total }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

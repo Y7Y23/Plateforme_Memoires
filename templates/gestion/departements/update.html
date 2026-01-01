@@ -1,0 +1,43 @@
+{% extends "base_admin.html" %}
+{% block title %}Modifier Département{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Modifier Département</h3>
+  <a class="btn btn-light" href="{% url 'gestion:departement_list' %}">← Retour</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Nom</label>
+          <input class="form-control" name="nom_departement"
+                 value="{{ dep.nom_departement }}" required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Niveau</label>
+          <select class="form-select" name="id_niveau" required>
+            {% for n in niveaux %}
+              <option value="{{ n.id_niveau }}"
+                {% if n.id_niveau == dep.id_niveau %}selected{% endif %}>
+                {{ n.libelle }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-12">
+          <button class="btn btn-primary">Enregistrer</button>
+          <a class="btn btn-outline-secondary" href="{% url 'gestion:departement_list' %}">
+            Annuler
+          </a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
