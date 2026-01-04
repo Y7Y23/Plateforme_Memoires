@@ -15,6 +15,13 @@ urlpatterns = [
     path("mes-soutenances/", views.my_soutenances, name="my_soutenances"),
     path("mes-soutenances/<int:id_soutenance>/", views.my_soutenance_detail, name="my_soutenance_detail"),
     path("mes-soutenances/<int:id_soutenance>/note/", views.my_soutenance_note, name="my_soutenance_note"),
+
+
+    path("messages/", views.messages_list, name="messages_list"),
+    path("messages/<int:id_conversation>/", views.messages_detail, name="messages_detail"),
+    path("messages/<int:id_conversation>/send/", views.messages_send, name="messages_send"),
+    path("memoires/<int:id_memoire>/conversation/start/", views.conversation_start, name="conversation_start"),
+
 ]
 
 

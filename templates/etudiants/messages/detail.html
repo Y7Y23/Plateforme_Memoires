@@ -1,0 +1,65 @@
+{% extends "base_etudiant.html" %}
+
+{% block extra_css %}
+<style>
+  .chat-box { height: 62vh; overflow-y: auto; background: #f7f8fb; border-radius: 12px; padding: 16px; }
+  .msg { max-width: 75%; padding: 10px 12px; border-radius: 12px; margin: 8px 0; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .msg.me { margin-left: auto; background: #dbeafe; }
+  .msg.other { margin-right: auto; background: #fff; }
+  .msg .meta { font-size: 12px; opacity: .65; margin-top: 6px; display:flex; gap:10px; align-items:center; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="mb-0">
+      {{ conversation.resp_nom }} {{ conversation.resp_prenom }}
+      <span class="text-muted fw-normal">— {{ conversation.memoire_titre }}</span>
+    </h4>
+    <div class="text-muted small">{{ conversation.resp_email }}</div>
+  </div>
+  <a href="{% url 'etudiant:messages_list' %}" class="btn btn-outline-secondary">Retour</a>
+</div>
+
+<div class="chat-box mb-3" id="chatBox">
+  {% for m in messages_list %}
+    <div class="msg {% if m.sender_type == 'ETUDIANT' and m.sender_id == me_id %}me{% else %}other{% endif %}">
+      <div>{{ m.contenu|linebreaksbr }}</div>
+      <div class="meta">
+        <span>{{ m.created_at }}</span>
+        {% if m.sender_type == 'ETUDIANT' %}
+          <span class="badge bg-primary">Moi</span>
+        {% else %}
+          <span class="badge bg-secondary">Encadrant</span>
+        {% endif %}
+      </div>
+    </div>
+  {% empty %}
+    <div class="text-muted">Aucun message.</div>
+  {% endfor %}
+</div>
+
+<form class="card p-3" method="post" action="{% url 'etudiant:messages_send' conversation.id_conversation %}">
+  {% csrf_token %}
+  <div class="row g-2 align-items-center">
+    <div class="col-md-10">
+      <textarea class="form-control" name="contenu" rows="2" placeholder="Écrire un message..." required></textarea>
+    </div>
+    <div class="col-md-2 d-grid">
+      <button class="btn btn-primary">
+        <i class="fa fa-paper-plane"></i> Envoyer
+      </button>
+    </div>
+  </div>
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const box = document.getElementById("chatBox");
+  if (box) box.scrollTop = box.scrollHeight;
+</script>
+{% endblock %}

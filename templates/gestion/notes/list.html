@@ -33,7 +33,6 @@
         <th>Étudiant (Matricule)</th>
         <th>Mémoire</th>
         <th>Jury / Salle</th>
-        <th>Moyenne</th>
         <th>Note finale</th>
         <th class="text-end">Détails</th>
       </tr>
@@ -56,13 +55,7 @@
             <span class="text-muted">—</span>
           {% endif %}
         </td>
-        <td>
-          {% if r.note_finale is not None %}
-            <strong>{{ r.note_finale }}</strong>
-          {% else %}
-            <span class="text-muted">Non validée</span>
-          {% endif %}
-        </td>
+        
         <td class="text-end">
           <a class="btn btn-sm btn-outline-secondary"
              href="{% url 'gestion:note_detail' r.id_soutenance %}">Voir</a>

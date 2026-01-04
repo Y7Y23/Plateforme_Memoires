@@ -432,6 +432,20 @@
             {% endif %}
           {% endif %}
 
+          {# ========================= #}
+          {# MESSAGERIE (ENCADRANT / CO-ENCADRANT) #}
+          {# ========================= #}
+          {% if request.session.is_admin or "ENCADRANT" in request.session.role_codes or "CO_ENCADRANT" in request.session.role_codes %}
+            <li class="nav-item {% if current == 'messages_list' or current == 'messages_detail' %}active{% endif %}">
+              <a href="{% url 'responsable:messages_list' %}">
+                <i class="fas fa-comments"></i>
+                <p>Messagerie</p>
+              </a>
+            </li>
+          {% endif %}
+
+
+
           <li class="nav-item mt-3">
             <form method="post" action="{% url 'accounts:logout' %}" class="d-inline w-100">
               {% csrf_token %}

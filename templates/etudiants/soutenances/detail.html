@@ -1,0 +1,162 @@
+{% extends "base_etudiant.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="mb-0">Détail soutenance #{{ soutenance.id_soutenance }}</h3>
+    <div class="text-muted">Année : {{ annee_libelle }}</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'etudiant:dashboard' %}">Retour</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-3">Informations</h5>
+
+        <div class="row g-2">
+          <div class="col-md-6"><strong>Date :</strong> {{ soutenance.date_ }}</div>
+          <div class="col-md-6"><strong>Heure :</strong> {{ soutenance.heure }}</div>
+          <div class="col-md-6"><strong>Salle :</strong> {{ soutenance.nom_salle }}</div>
+          <div class="col-md-6">
+            <strong>Statut :</strong>
+            <span class="badge
+              {% if soutenance.statut == 'EFFECTUEE' %}bg-success
+              {% elif soutenance.statut == 'PLANIFIEE' %}bg-warning text-dark
+              {% else %}bg-secondary{% endif %}">
+              {{ soutenance.statut }}
+            </span>
+          </div>
+          <div class="col-12"><strong>Jury :</strong> {{ soutenance.nom_jury }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-body">
+        <h5 class="mb-2">Mémoire</h5>
+        <div><strong>ID :</strong> {{ soutenance.id_memoire }}</div>
+        <div><strong>Titre :</strong> {{ soutenance.titre }}</div>
+        <div class="text-muted">{{ soutenance.memoire_type }} · Statut mémoire : {{ soutenance.memoire_statut }}</div>
+
+        <div class="mt-3">
+          <a class="btn btn-sm btn-outline-primary" href="{% url 'etudiant:memoire_detail' soutenance.id_memoire %}">
+            Voir le mémoire
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ NOTES JURY -->
+    <div class="card mt-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Notes par membre du jury</h5>
+          <div>
+            <strong>Moyenne :</strong>
+            {% if moyenne is not None %} {{ moyenne }} {% else %}<span class="text-muted">—</span>{% endif %}
+          </div>
+        </div>
+
+        {% if soutenance.statut != 'EFFECTUEE' %}
+          <div class="alert alert-info mb-0">
+            Les notes seront visibles après que la soutenance soit marquée <strong>EFFECTUEE</strong>.
+          </div>
+        {% else %}
+          <div class="table-responsive">
+            <table class="table table-sm table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Membre</th>
+                  <th style="width:120px;">Note /20</th>
+                  <th>Commentaire</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in jury_items %}
+                  {% with m=item.m nj=item.nj %}
+                    <tr>
+                      <td>
+                        <strong>{{ m.nom }} {{ m.prenom }}</strong>
+                        {% if m.roles %}
+                          <div class="text-muted small">{{ m.roles }}</div>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if nj %}
+                          <span class="badge bg-primary">{{ nj.note }}</span>
+                        {% else %}
+                          <span class="text-muted">—</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        {% if nj and nj.commentaire %}
+                          {{ nj.commentaire }}
+                        {% else %}
+                          <span class="text-muted">—</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% endwith %}
+                {% empty %}
+                  <tr><td colspan="3" class="text-center text-muted py-3">Aucun membre jury.</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ✅ NOTE FINALE -->
+    <div class="card mt-3">
+      <div class="card-body">
+        <h5 class="mb-2">Résultat final</h5>
+
+        {% if soutenance.statut != 'EFFECTUEE' %}
+          <div class="text-muted">La note finale sera disponible après l'exécution de la soutenance.</div>
+        {% else %}
+          {% if soutenance.note_finale %}
+            <p class="mb-1">
+              <strong>Note finale :</strong>
+              <span class="badge bg-success">{{ soutenance.note_finale }}/20</span>
+            </p>
+            {% if soutenance.commentaire_final %}
+              <p class="text-muted mb-0">{{ soutenance.commentaire_final }}</p>
+            {% endif %}
+          {% else %}
+            <div class="alert alert-warning mb-0">
+              Soutenance effectuée, mais la note finale n'est pas encore validée.
+            </div>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="mb-2">Membres du jury</h5>
+        {% if jury_membres %}
+          <ul class="mb-0">
+            {% for m in jury_membres %}
+              <li class="mb-1">
+                <strong>{{ m.nom }} {{ m.prenom }}</strong> — {{ m.email }}
+                {% if m.roles %}
+                  <div class="text-muted small">{{ m.roles }}</div>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">Aucun membre trouvé.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -13,251 +13,120 @@
   {% block extra_css %}{% endblock %}
 
 <style>
-  /* Logo link */
-  .logo-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
+  .logo-link { text-decoration: none; color: inherit; display: block; }
+  .logo-link:hover .logo-text { opacity: 0.8; transition: opacity 0.2s ease; }
+
+  :root { --primary-color:#1572e8; --sidebar-bg:#1a1d2e; --sidebar-hover:#252a41; }
+
+  body { font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  .sidebar{
+    position:fixed; top:0; left:0; bottom:0;
+    width:260px; height:100vh; max-height:100vh;
+    display:flex; flex-direction:column; overflow:hidden;
+    background:linear-gradient(180deg,#1a1d2e 0%,#151825 100%);
+    box-shadow:4px 0 20px rgba(0,0,0,.1);
   }
 
-  .logo-link:hover .logo-text {
-    opacity: 0.8;
-    transition: opacity 0.2s ease;
+  .sidebar-logo{
+    flex-shrink:0; padding:1.5rem;
+    border-bottom:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.02);
   }
 
-  :root {
-    --primary-color: #1572e8;
-    --sidebar-bg: #1a1d2e;
-    --sidebar-hover: #252a41;
+  .sidebar-logo .logo-text{
+    font-size:1.5rem; font-weight:700; color:#fff;
+    margin-bottom:.5rem; letter-spacing:-.5px;
+    display:flex; align-items:center; gap:.5rem;
   }
 
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  .sidebar-logo .logo-icon{
+    width:40px; height:40px; background:transparent; border-radius:8px;
+    display:flex; align-items:center; justify-content:center; overflow:hidden; flex-shrink:0;
+  }
+  .sidebar-logo .logo-icon img{ width:100%; height:100%; object-fit:contain; }
+
+  .sidebar-logo .subtitle{
+    font-size:.75rem; color:rgba(255,255,255,.5);
+    font-weight:500; text-transform:uppercase; letter-spacing:1px;
   }
 
-  .sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 260px;
-    height: 100vh;
-    max-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    background: linear-gradient(180deg, #1a1d2e 0%, #151825 100%);
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  .student-info{
+    margin-top:1rem; padding:.75rem;
+    background:rgba(21,114,232,.1);
+    border-radius:8px; border:1px solid rgba(21,114,232,.2);
+  }
+  .student-info .student-name{
+    color:#fff; font-size:.875rem; font-weight:500;
+    display:flex; align-items:center; gap:.5rem;
+  }
+  .student-info .student-name i{ color:var(--primary-color); }
+
+  .sidebar-wrapper{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    padding:1rem 0;
+  }
+  .sidebar-wrapper .nav{ padding-bottom:2rem; }
+
+  .sidebar-wrapper::-webkit-scrollbar{ width:6px; }
+  .sidebar-wrapper::-webkit-scrollbar-track{ background:rgba(255,255,255,.05); }
+  .sidebar-wrapper::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.2); border-radius:3px; }
+  .sidebar-wrapper::-webkit-scrollbar-thumb:hover{ background:rgba(255,255,255,.3); }
+
+  .nav-section{ padding:1rem 1.5rem .5rem; }
+  .nav-section .text-section{
+    font-size:.75rem; font-weight:600; color:rgba(255,255,255,.4);
+    text-transform:uppercase; letter-spacing:1px; margin:0;
   }
 
-  /* ===== LOGO ===== */
-  .sidebar-logo {
-    flex-shrink: 0;
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.02);
+  .nav-item{ margin:.25rem .75rem; }
+  .nav-item > a{
+    display:flex; align-items:center;
+    padding:.75rem 1rem;
+    color:rgba(255,255,255,.7);
+    text-decoration:none; border-radius:8px;
+    transition:all .2s ease; font-size:.938rem;
+  }
+  .nav-item > a:hover{ background:var(--sidebar-hover); color:#fff; transform:translateX(2px); }
+
+  .nav-item.active > a{
+    background:linear-gradient(135deg,var(--primary-color) 0%,#0d5dbf 100%);
+    color:#fff; box-shadow:0 4px 12px rgba(21,114,232,.3);
   }
 
-  .sidebar-logo .logo-text {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 0.5rem;
-    letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  .nav-item > a i{ width:20px; margin-right:.75rem; font-size:1rem; }
+  .nav-item > a p{ margin:0; font-weight:500; }
+
+  .nav-item .btn-link{
+    width:100%; text-align:left;
+    display:flex; align-items:center;
+    padding:.75rem 1rem;
+    color:#ff4d4d; text-decoration:none;
+    border-radius:8px; transition:all .2s ease;
+    font-size:.938rem;
+    border:1px solid rgba(255,77,77,.2);
+    background:rgba(255,77,77,.05);
   }
-
-  .sidebar-logo .logo-icon {
-    width: 40px;
-    height: 40px;
-    background: transparent;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    flex-shrink: 0;
+  .nav-item .btn-link:hover{
+    background:rgba(255,77,77,.15);
+    border-color:rgba(255,77,77,.4);
+    transform:translateX(2px);
   }
+  .nav-item .btn-link i{ width:20px; margin-right:.75rem; font-size:1rem; }
 
-  .sidebar-logo .logo-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+  .main-panel{ margin-left:260px; min-height:100vh; background:#f8f9fa; }
+  .content{ padding:2rem; }
+  .page-inner{ max-width:1400px; }
 
-  .sidebar-logo .subtitle {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.5);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  /* Student info box */
-  .student-info {
-    margin-top: 1rem;
-    padding: 0.75rem;
-    background: rgba(21, 114, 232, 0.1);
-    border-radius: 8px;
-    border: 1px solid rgba(21, 114, 232, 0.2);
-  }
-
-  .student-info .student-name {
-    color: #fff;
-    font-size: 0.875rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .student-info .student-name i {
-    color: var(--primary-color);
-  }
-
-  .sidebar-wrapper {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding: 1rem 0;
-  }
-
-  .sidebar-wrapper .nav {
-    padding-bottom: 2rem;
-  }
-
-  /* Custom scrollbar */
-  .sidebar-wrapper::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .sidebar-wrapper::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-  }
-
-  .sidebar-wrapper::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 3px;
-  }
-
-  .sidebar-wrapper::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  .nav-section {
-    padding: 1rem 1.5rem 0.5rem;
-  }
-
-  .nav-section .text-section {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 0;
-  }
-
-  .nav-item {
-    margin: 0.25rem 0.75rem;
-  }
-
-  .nav-item a {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    font-size: 0.938rem;
-  }
-
-  .nav-item a:hover {
-    background: var(--sidebar-hover);
-    color: #fff;
-    transform: translateX(2px);
-  }
-
-  .nav-item.active a {
-    background: linear-gradient(135deg, var(--primary-color) 0%, #0d5dbf 100%);
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(21, 114, 232, 0.3);
-  }
-
-  .nav-item a i {
-    width: 20px;
-    margin-right: 0.75rem;
-    font-size: 1rem;
-  }
-
-  .nav-item a p {
-    margin: 0;
-    font-weight: 500;
-  }
-
-  /* Logout button */
-  .nav-item .btn-link {
-    width: 100%;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    padding: 0.75rem 1rem;
-    color: #ff4d4d;
-    text-decoration: none;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    font-size: 0.938rem;
-    border: 1px solid rgba(255, 77, 77, 0.2);
-    background: rgba(255, 77, 77, 0.05);
-  }
-
-  .nav-item .btn-link:hover {
-    background: rgba(255, 77, 77, 0.15);
-    border-color: rgba(255, 77, 77, 0.4);
-    transform: translateX(2px);
-  }
-
-  .nav-item .btn-link i {
-    width: 20px;
-    margin-right: 0.75rem;
-    font-size: 1rem;
-  }
-
-  .main-panel {
-    margin-left: 260px;
-    min-height: 100vh;
-    background: #f8f9fa;
-  }
-
-  .content {
-    padding: 2rem;
-  }
-
-  .page-inner {
-    max-width: 1400px;
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .sidebar {
-      width: 0;
-      transform: translateX(-260px);
-      transition: transform 0.3s ease;
-    }
-
-    .sidebar.active {
-      transform: translateX(0);
-    }
-
-    .main-panel {
-      margin-left: 0;
-    }
+  @media (max-width:768px){
+    .sidebar{ width:0; transform:translateX(-260px); transition:transform .3s ease; }
+    .sidebar.active{ transform:translateX(0); }
+    .main-panel{ margin-left:0; }
   }
 </style>
-
 </head>
 
 <body>
@@ -266,7 +135,7 @@
     <!-- Sidebar -->
     <div class="sidebar" data-background-color="dark">
       <div class="sidebar-logo">
-        <a href="{% url 'etudiant:dashboard' %}" class="logo-text" style="text-decoration: none;">
+        <a href="{% url 'etudiant:dashboard' %}" class="logo-text" style="text-decoration:none;">
           <div class="logo-icon">
             <img src="{% static 'assets/img/logo.png' %}" alt="ISMS Logo">
           </div>
@@ -294,13 +163,13 @@
             </a>
           </li>
 
-          <!-- Mémoires -->
+          <!-- Section Mémoires -->
           <li class="nav-section">
             <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
             <h4 class="text-section">Mes Mémoires</h4>
           </li>
 
-          <li class="nav-item {% if current == 'memoire_list' %}active{% endif %}">
+          <li class="nav-item {% if current == 'memoire_list' or current == 'memoire_detail' %}active{% endif %}">
             <a href="{% url 'etudiant:memoire_list' %}">
               <i class="fas fa-book"></i>
               <p>Mes mémoires</p>
@@ -311,6 +180,45 @@
             <a href="{% url 'etudiant:memoire_create' %}">
               <i class="fas fa-upload"></i>
               <p>Déposer un mémoire</p>
+            </a>
+          </li>
+
+          <!-- Section Soutenances -->
+          <li class="nav-section">
+            <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+            <h4 class="text-section">Soutenance</h4>
+          </li>
+
+          <li class="nav-item {% if current == 'soutenance_list' or current == 'soutenance_detail' %}active{% endif %}">
+            <a href="{% url 'etudiant:soutenance_list' %}">
+              <i class="fas fa-calendar-check"></i>
+              <p>Mes soutenances</p>
+            </a>
+          </li>
+
+          <!-- Section Communication -->
+          <li class="nav-section">
+            <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+            <h4 class="text-section">Communication</h4>
+          </li>
+
+          <li class="nav-item {% if current == 'messages_list' or current == 'messages_detail' %}active{% endif %}">
+            <a href="{% url 'etudiant:messages_list' %}">
+              <i class="fas fa-comments"></i>
+              <p>Messagerie</p>
+            </a>
+          </li>
+
+          <!-- Section Archive -->
+          <li class="nav-section">
+            <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+            <h4 class="text-section">Ressources</h4>
+          </li>
+
+          <li class="nav-item {% if current == 'archive_list' or current == 'archive_detail' %}active{% endif %}">
+            <a href="{% url 'etudiant:archive_list' %}">
+              <i class="fas fa-archive"></i>
+              <p>Archive</p>
             </a>
           </li>
 

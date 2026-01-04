@@ -1,0 +1,78 @@
+{% extends "base_etudiant.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="mb-0">Archive — Détails</h3>
+    <div class="text-muted">{{ mem.annee_libelle }} · {{ mem.nom_departement }} · {{ mem.type }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'etudiant:archive_list' %}">Retour</a>
+    {% if mem.pdf_url %}
+      <a class="btn btn-primary" href="{{ mem.pdf_url }}" target="_blank" rel="noopener">Ouvrir PDF</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="mb-2">{{ mem.titre }}</h4>
+        <div class="text-muted mb-3">
+          Déposé : {{ mem.date_depot|date:"Y-m-d H:i" }}
+        </div>
+
+        {% if mem.description %}
+          <h6>Description</h6>
+          <div class="mb-0" style="white-space: pre-wrap;">{{ mem.description }}</div>
+        {% else %}
+          <div class="text-muted">Aucune description.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-body">
+        <h6 class="mb-2">Encadrement</h6>
+        {% if encadreurs %}
+          <ul class="mb-0">
+            {% for e in encadreurs %}
+              <li>
+                <strong>{{ e.encadrement }}</strong> — {{ e.nom }} {{ e.prenom }} <span class="text-muted">({{ e.email }})</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">Aucun encadreur trouvé.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="mb-2">Auteur</h6>
+        <div class="fw-semibold">{{ mem.etu_nom }} {{ mem.etu_prenom }}</div>
+        <div class="text-muted">{{ mem.etu_email }}</div>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-body">
+        <h6 class="mb-2">Soutenance</h6>
+        {% if soutenance %}
+          <div><strong>Statut :</strong> {{ soutenance.statut }}</div>
+          <div><strong>Date :</strong> {{ soutenance.date_ }} {{ soutenance.heure }}</div>
+          <div><strong>Salle :</strong> {{ soutenance.nom_salle }}</div>
+          <div><strong>Jury :</strong> {{ soutenance.nom_jury }}</div>
+        {% else %}
+          <div class="text-muted">Aucune soutenance liée.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

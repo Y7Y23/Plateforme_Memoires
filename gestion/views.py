@@ -1,3 +1,4 @@
+import re
 from django.contrib import messages
 from django.db import connection
 from django.shortcuts import redirect, render
@@ -28,23 +29,169 @@ def fetchall_dict(cur):
     return [dict(zip(cols, row)) for row in cur.fetchall()]
 
 
-# ---------- DASHBOARD ----------
+# ---------- DASHBOARD ----------# views.py
+import json
+from django.db import connection
+from django.shortcuts import render
+from django.core.serializers.json import DjangoJSONEncoder
+from datetime import datetime, timedelta
+
 @superadmin_required
 def dashboard(request):
     with connection.cursor() as cur:
+        # Statistiques principales
         cur.execute("SELECT COUNT(*) FROM isms.etudiant;")
         nb_etudiants = cur.fetchone()[0]
+        
         cur.execute("SELECT COUNT(*) FROM isms.responsable;")
         nb_responsables = cur.fetchone()[0]
-        cur.execute("SELECT statut, COUNT(*) FROM isms.memoire GROUP BY statut ORDER BY statut;")
+        
+        cur.execute("SELECT COUNT(*) FROM isms.memoire;")
+        total_memoires = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(*) FROM isms.soutenance;")
+        total_soutenances = cur.fetchone()[0]
+        
+        # Mémoires par statut
+        cur.execute("""
+            SELECT statut, COUNT(*) 
+            FROM isms.memoire 
+            GROUP BY statut 
+            ORDER BY statut;
+        """)
         mem_stats = cur.fetchall()
-
-    return render(request, "gestion/dashboard.html", {
-        "nb_etudiants": nb_etudiants,
-        "nb_responsables": nb_responsables,
-        "mem_stats": mem_stats,
-    })
-
+        
+        # Soutenances par mois (derniers 6 mois) - CORRECTION ICI
+        cur.execute("""
+            SELECT 
+                TO_CHAR(date_, 'Mon YYYY') as mois,
+                COUNT(*) as total
+            FROM isms.soutenance
+            WHERE date_ >= CURRENT_DATE - INTERVAL '6 months'
+            GROUP BY TO_CHAR(date_, 'Mon YYYY'), 
+                     DATE_TRUNC('month', date_)
+            ORDER BY DATE_TRUNC('month', date_);
+        """)
+        soutenances_par_mois = cur.fetchall()
+        
+        # Étudiants par département
+        cur.execute("""
+            SELECT d.nom_departement, COUNT(e.id_etudiant) as total
+            FROM isms.departement d
+            LEFT JOIN isms.etudiant e ON d.id_departement = e.id_departement
+            GROUP BY d.nom_departement
+            ORDER BY total DESC;
+        """)
+        etudiants_par_dept = cur.fetchall()
+        
+        # Statistiques additionnelles
+        cur.execute("SELECT COUNT(*) FROM isms.jury;")
+        nb_jurys = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(*) FROM isms.salle;")
+        nb_salles = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(DISTINCT id_departement) FROM isms.departement;")
+        nb_departements = cur.fetchone()[0]
+        
+        cur.execute("""
+            SELECT COUNT(*) 
+            FROM isms.memoire 
+            WHERE statut = 'VALIDE';
+        """)
+        memoires_valides = cur.fetchone()[0]
+        
+        cur.execute("""
+            SELECT COUNT(*) 
+            FROM isms.memoire 
+            WHERE statut = 'EN_VERIFICATION';
+        """)
+        memoires_en_verification = cur.fetchone()[0]
+        
+        # Mémoires par type
+        cur.execute("""
+            SELECT type, COUNT(*) as total
+            FROM isms.memoire
+            GROUP BY type
+            ORDER BY total DESC;
+        """)
+        memoires_par_type = cur.fetchall()
+        
+        # Distribution des notes - VERSION CORRIGÉE ET SIMPLIFIÉE
+        cur.execute("""
+            SELECT tranche, COUNT(*) as total
+            FROM (
+                SELECT 
+                    CASE 
+                        WHEN note_finale < 10 THEN 'Moins de 10'
+                        WHEN note_finale >= 10 AND note_finale < 12 THEN '10 - 12'
+                        WHEN note_finale >= 12 AND note_finale < 14 THEN '12 - 14'
+                        WHEN note_finale >= 14 AND note_finale < 16 THEN '14 - 16'
+                        ELSE 'Plus de 16'
+                    END as tranche,
+                    CASE 
+                        WHEN note_finale < 10 THEN 1
+                        WHEN note_finale >= 10 AND note_finale < 12 THEN 2
+                        WHEN note_finale >= 12 AND note_finale < 14 THEN 3
+                        WHEN note_finale >= 14 AND note_finale < 16 THEN 4
+                        ELSE 5
+                    END as ordre
+                FROM isms.note
+                WHERE note_finale IS NOT NULL
+            ) AS notes_classees
+            GROUP BY tranche, ordre
+            ORDER BY ordre;
+        """)
+        notes_distribution = cur.fetchall()
+        
+        # Activité des 7 derniers jours
+        cur.execute("""
+            SELECT 
+                TO_CHAR(date_depot, 'DD/MM') as jour,
+                COUNT(*) as total
+            FROM isms.memoire
+            WHERE date_depot >= CURRENT_DATE - INTERVAL '7 days'
+            GROUP BY date_depot, TO_CHAR(date_depot, 'DD/MM')
+            ORDER BY date_depot;
+        """)
+        activite_7_jours = cur.fetchall()
+        
+        # Si pas de données pour les 7 derniers jours, créer des données vides
+        if not activite_7_jours:
+            activite_7_jours = []
+            for i in range(7):
+                jour = datetime.now() - timedelta(days=6-i)
+                activite_7_jours.append((jour.strftime('%d/%m'), 0))
+    
+    # Fonction helper pour convertir les tuples en format JSON
+    def format_data(data):
+        return [{'label': str(row[0]), 'value': int(row[1])} for row in data]
+    
+    # Convertir les données en JSON pour JavaScript
+    context = {
+        # Statistiques principales
+        'nb_etudiants': nb_etudiants,
+        'nb_responsables': nb_responsables,
+        'total_memoires': total_memoires,
+        'total_soutenances': total_soutenances,
+        
+        # Statistiques additionnelles
+        'nb_jurys': nb_jurys,
+        'nb_salles': nb_salles,
+        'nb_departements': nb_departements,
+        'memoires_valides': memoires_valides,
+        'memoires_en_verification': memoires_en_verification,
+        
+        # Données pour les graphiques (en JSON)
+        'mem_stats_json': json.dumps(format_data(mem_stats), cls=DjangoJSONEncoder),
+        'soutenances_par_mois_json': json.dumps(format_data(soutenances_par_mois), cls=DjangoJSONEncoder),
+        'etudiants_par_dept_json': json.dumps(format_data(etudiants_par_dept), cls=DjangoJSONEncoder),
+        'memoires_par_type_json': json.dumps(format_data(memoires_par_type), cls=DjangoJSONEncoder),
+        'notes_distribution_json': json.dumps(format_data(notes_distribution), cls=DjangoJSONEncoder),
+        'activite_7_jours_json': json.dumps(format_data(activite_7_jours), cls=DjangoJSONEncoder),
+    }
+    
+    return render(request, "gestion/dashboard.html", context)
 
 # =========================
 # REFERENTIELS
@@ -2672,7 +2819,8 @@ def note_detail(request, soutenance_id):
             JOIN isms.jury j ON j.id_jury = s.id_jury
             JOIN isms.salle sa ON sa.id_salle = s.id_salle
             LEFT JOIN isms.note n ON n.id_soutenance = s.id_soutenance
-            WHERE s.id_soutenance=%s AND s.id_annee=%s
+            WHERE s.id_soutenance = %s AND s.id_annee = %s
+            LIMIT 1
         """, [soutenance_id, annee_id])
         base_rows = dictfetchall(cur)
 
@@ -2695,15 +2843,20 @@ def note_detail(request, soutenance_id):
         """, [memoire_id])
         encadrements = dictfetchall(cur)
 
-    # Membres du jury
+    # Membres du jury + rôles (M2M responsable_role)
     with connection.cursor() as cur:
         cur.execute("""
-            SELECT r.id_responsable, r.nom, r.prenom, r.email,
-                   ro.code AS role_code, ro.libelle AS role_libelle
+            SELECT
+                r.id_responsable,
+                r.nom, r.prenom, r.email,
+                COALESCE(string_agg(DISTINCT ro.code, ', '), '')     AS role_code,
+                COALESCE(string_agg(DISTINCT ro.libelle, ', '), '')  AS role_libelle
             FROM isms.composition_jury cj
             JOIN isms.responsable r ON r.id_responsable = cj.id_responsable
-            JOIN isms.role ro ON ro.id_role = r.id_role
+            LEFT JOIN isms.responsable_role rr ON rr.id_responsable = r.id_responsable
+            LEFT JOIN isms.role ro ON ro.id_role = rr.id_role
             WHERE cj.id_jury = %s
+            GROUP BY r.id_responsable, r.nom, r.prenom, r.email
             ORDER BY r.nom, r.prenom
         """, [jury_id])
         jury_membres = dictfetchall(cur)
@@ -2719,6 +2872,9 @@ def note_detail(request, soutenance_id):
 
     note_jury_map = {r["id_responsable"]: r for r in note_jury_rows}
 
+    # ✅ IMPORTANT : construire jury_items pour le template
+    jury_items = [{"m": m, "nj": note_jury_map.get(m["id_responsable"])} for m in jury_membres]
+
     # Moyenne harmonisée
     with connection.cursor() as cur:
         cur.execute("""
@@ -2732,100 +2888,12 @@ def note_detail(request, soutenance_id):
         "base": base,
         "encadrements": encadrements,
         "jury_membres": jury_membres,
-        "note_jury_map": note_jury_map,
+        "jury_items": jury_items,          # ✅ AJOUT
+        "note_jury_map": note_jury_map,    # optionnel (plus utilisé par template actuel)
         "moyenne": moyenne,
     })
 
 
-
-    annee_id = request.session.get("annee_id")
-
-    # 1) Soutenance + mémoire + étudiant + jury + salle + note finale
-    with connection.cursor() as cur:
-        cur.execute("""
-            SELECT
-                s.id_soutenance, s.date_, s.heure, s.statut,
-                sa.nom_salle,
-                j.id_jury, j.nom_jury,
-
-                m.id_memoire, m.titre, m.type, m.statut AS mem_statut, m.date_depot, m.description,
-                e.id_etudiant, e.nom AS etu_nom, e.prenom AS etu_prenom, e.email AS etu_email, e.telephone,e.niveau,
-
-                n.id_note, n.note_finale, n.commentaire AS commentaire_final
-
-            FROM isms.soutenance s
-            JOIN isms.memoire m ON m.id_memoire = s.id_memoire
-            JOIN isms.etudiant e ON e.id_etudiant = m.id_etudiant
-            JOIN isms.jury j ON j.id_jury = s.id_jury
-            JOIN isms.salle sa ON sa.id_salle = s.id_salle
-            LEFT JOIN isms.note n ON n.id_soutenance = s.id_soutenance
-
-            WHERE s.id_soutenance=%s AND s.id_annee=%s
-        """, [soutenance_id, annee_id])
-        base = dictfetchall(cur)
-
-    if not base:
-        messages.error(request, "Soutenance/Note introuvable (ou pas dans l'année sélectionnée).")
-        return redirect("gestion:note_list")
-
-    base = base[0]
-    jury_id = base["id_jury"]
-    memoire_id = base["id_memoire"]
-
-    # 2) Encadrements du mémoire
-    with connection.cursor() as cur:
-        cur.execute("""
-            SELECT
-                r.id_responsable, r.nom, r.prenom, r.email,
-                en.encadrement
-            FROM isms.encadrement en
-            JOIN isms.responsable r ON r.id_responsable = en.id_responsable
-            WHERE en.id_memoire = %s
-            ORDER BY en.encadrement, r.nom, r.prenom
-        """, [memoire_id])
-        encadrements = dictfetchall(cur)
-
-    # 3) Membres du jury (composition)
-    with connection.cursor() as cur:
-        cur.execute("""
-            SELECT
-                r.id_responsable, r.nom, r.prenom, r.email,
-                ro.code AS role_code, ro.libelle AS role_libelle
-            FROM isms.composition_jury cj
-            JOIN isms.responsable r ON r.id_responsable = cj.id_responsable
-            JOIN isms.role ro ON ro.id_role = r.id_role
-            WHERE cj.id_jury = %s
-            ORDER BY r.nom, r.prenom
-        """, [jury_id])
-        jury_membres = dictfetchall(cur)
-
-    # 4) Notes jury déjà saisies
-    with connection.cursor() as cur:
-        cur.execute("""
-            SELECT id_responsable, note, commentaire
-            FROM isms.note_jury
-            WHERE id_soutenance = %s
-        """, [soutenance_id])
-        note_jury_rows = dictfetchall(cur)
-
-    note_jury_map = {r["id_responsable"]: r for r in note_jury_rows}
-
-    # 5) Moyenne harmonisée
-    with connection.cursor() as cur:
-        cur.execute("""
-            SELECT ROUND(AVG(note)::numeric, 2)
-            FROM isms.note_jury
-            WHERE id_soutenance = %s
-        """, [soutenance_id])
-        moyenne = cur.fetchone()[0]
-
-    return render(request, "gestion/notes/detail.html", {
-        "base": base,
-        "encadrements": encadrements,
-        "jury_membres": jury_membres,
-        "note_jury_map": note_jury_map,
-        "moyenne": moyenne,
-    })
 
 @superadmin_required
 @admin_year_required

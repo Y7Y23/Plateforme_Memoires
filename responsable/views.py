@@ -557,3 +557,214 @@ def my_soutenance_note(request, id_soutenance: int):
 
     messages.success(request, "Votre note a été enregistrée.")
     return redirect("responsable:my_soutenance_detail", id_soutenance=id_soutenance)
+
+
+
+
+# ========================================================= Messages (etudiant) =========================================================
+@responsable_required
+@admin_year_required
+def messages_list(request):
+    responsable_id = request.session.get("responsable_id")
+    q = (request.GET.get("q") or "").strip().lower()
+
+    where = ["c.id_responsable = %s"]
+    params = [responsable_id]
+
+    if q:
+        like = f"%{q}%"
+        where.append("(LOWER(e.nom) LIKE %s OR LOWER(e.prenom) LIKE %s OR LOWER(m.titre) LIKE %s)")
+        params.extend([like, like, like])
+
+    sql = f"""
+      SELECT
+        c.id_conversation,
+        c.created_at,
+        e.id_etudiant, e.nom, e.prenom, e.email,
+        m.id_memoire, m.titre,
+        (
+          SELECT mm.contenu
+          FROM isms.message mm
+          WHERE mm.id_conversation = c.id_conversation
+          ORDER BY mm.created_at DESC
+          LIMIT 1
+        ) AS last_msg,
+        (
+          SELECT mm.created_at
+          FROM isms.message mm
+          WHERE mm.id_conversation = c.id_conversation
+          ORDER BY mm.created_at DESC
+          LIMIT 1
+        ) AS last_at,
+        (
+          SELECT COUNT(*)
+          FROM isms.message mm
+          WHERE mm.id_conversation = c.id_conversation
+            AND mm.sender_type = 'ETUDIANT'
+            AND mm.is_read = FALSE
+        ) AS unread_count
+      FROM isms.conversation c
+      JOIN isms.etudiant e ON e.id_etudiant = c.id_etudiant
+      JOIN isms.memoire m ON m.id_memoire = c.id_memoire
+      WHERE {" AND ".join(where)}
+      ORDER BY last_at DESC NULLS LAST, c.created_at DESC
+    """
+
+    with connection.cursor() as cur:
+        cur.execute(sql, params)
+        conversations = fetchall_dict(cur)
+
+    return render(request, "responsables/messages/list.html", {
+        "conversations": conversations,
+        "q": request.GET.get("q", ""),
+    })
+
+
+@responsable_required
+@admin_year_required
+def messages_detail(request, id_conversation: int):
+    responsable_id = request.session.get("responsable_id")
+
+    with connection.cursor() as cur:
+        # sécurité: conversation appartient au responsable
+        cur.execute("""
+          SELECT
+            c.id_conversation,
+            e.id_etudiant, e.nom, e.prenom, e.email,
+            m.id_memoire, m.titre
+          FROM isms.conversation c
+          JOIN isms.etudiant e ON e.id_etudiant = c.id_etudiant
+          JOIN isms.memoire m ON m.id_memoire = c.id_memoire
+          WHERE c.id_conversation = %s AND c.id_responsable = %s
+          LIMIT 1
+        """, [id_conversation, responsable_id])
+        conv = cur.fetchone()
+
+        if not conv:
+            messages.error(request, "Conversation introuvable ou accès non autorisé.")
+            return redirect("responsable:messages_list")
+
+        # marquer lus: messages envoyés par étudiant
+        cur.execute("""
+          UPDATE isms.message
+          SET is_read = TRUE
+          WHERE id_conversation = %s
+            AND sender_type = 'ETUDIANT'
+            AND is_read = FALSE
+        """, [id_conversation])
+
+        cur.execute("""
+          SELECT id_message, sender_type, sender_id, contenu, created_at, is_read
+          FROM isms.message
+          WHERE id_conversation = %s
+          ORDER BY created_at ASC
+        """, [id_conversation])
+        msgs = fetchall_dict(cur)
+
+    conversation = {
+        "id_conversation": conv[0],
+        "id_etudiant": conv[1],
+        "etu_nom": conv[2],
+        "etu_prenom": conv[3],
+        "etu_email": conv[4],
+        "id_memoire": conv[5],
+        "memoire_titre": conv[6],
+    }
+
+    return render(request, "responsables/messages/detail.html", {
+        "conversation": conversation,
+        "messages_list": msgs,
+        "me_id": responsable_id,
+    })
+
+
+@require_POST
+@responsable_required
+@admin_year_required
+def messages_send(request, id_conversation: int):
+    responsable_id = request.session.get("responsable_id")
+    contenu = (request.POST.get("contenu") or "").strip()
+
+    if not contenu:
+        messages.error(request, "Message vide.")
+        return redirect("responsable:messages_detail", id_conversation=id_conversation)
+
+    try:
+        with connection.cursor() as cur:
+            cur.execute("""
+              SELECT 1
+              FROM isms.conversation
+              WHERE id_conversation=%s AND id_responsable=%s
+              LIMIT 1
+            """, [id_conversation, responsable_id])
+            if cur.fetchone() is None:
+                messages.error(request, "Accès non autorisé.")
+                return redirect("responsable:messages_list")
+
+            cur.execute("""
+              INSERT INTO isms.message (id_conversation, sender_type, sender_id, contenu)
+              VALUES (%s, 'RESPONSABLE', %s, %s)
+            """, [id_conversation, responsable_id, contenu])
+
+        return redirect("responsable:messages_detail", id_conversation=id_conversation)
+
+    except DatabaseError:
+        messages.error(request, "Erreur base de données lors de l’envoi.")
+        return redirect("responsable:messages_detail", id_conversation=id_conversation)
+    
+
+
+
+@require_POST
+@responsable_required
+@admin_year_required
+def conversation_start(request, id_memoire: int):
+    """
+    Responsable: ouvre une conversation avec l’étudiant du mémoire.
+    Autorisé seulement si le responsable encadre / co-encadre ce mémoire.
+    """
+    responsable_id = request.session.get("responsable_id")
+
+    try:
+        with connection.cursor() as cur:
+            # 1) vérifier que ce responsable encadre ce mémoire
+            cur.execute("""
+              SELECT 1
+              FROM isms.encadrement
+              WHERE id_memoire=%s AND id_responsable=%s
+                AND encadrement IN ('ENCADRANT','CO_ENCADRANT')
+              LIMIT 1
+            """, [id_memoire, responsable_id])
+            if cur.fetchone() is None:
+                messages.error(request, "Accès non autorisé (vous n’êtes pas encadrant de ce mémoire).")
+                return redirect("responsable:memoire_list")
+
+            # 2) récupérer l'étudiant du mémoire
+            cur.execute("""
+              SELECT id_etudiant
+              FROM isms.memoire
+              WHERE id_memoire=%s
+              LIMIT 1
+            """, [id_memoire])
+            row = cur.fetchone()
+            if not row:
+                messages.error(request, "Mémoire introuvable.")
+                return redirect("responsable:memoire_list")
+
+            etudiant_id = row[0]
+
+            # 3) créer la conversation (ou récupérer via ON CONFLICT)
+            cur.execute("""
+              INSERT INTO isms.conversation (id_etudiant, id_responsable, id_memoire)
+              VALUES (%s, %s, %s)
+              ON CONFLICT (id_etudiant, id_responsable, id_memoire)
+              DO UPDATE SET id_etudiant = EXCLUDED.id_etudiant
+              RETURNING id_conversation
+            """, [etudiant_id, responsable_id, id_memoire])
+            conv_id = cur.fetchone()[0]
+
+        return redirect("responsable:messages_detail", id_conversation=conv_id)
+
+    except DatabaseError:
+        messages.error(request, "Erreur base de données lors de l’ouverture de la conversation.")
+        return redirect("responsable:memoire_list")

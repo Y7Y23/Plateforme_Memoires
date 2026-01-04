@@ -1,5 +1,4 @@
 {% extends "base_admin.html" %}
-{% load extras %}
 {% block content %}
 
 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -70,12 +69,17 @@
     <div class="card">
       <div class="card-body">
         <h5>Jury : {{ base.nom_jury }}</h5>
+
         {% if jury_membres %}
           <ul class="mb-0">
             {% for m in jury_membres %}
-              <li>
+              <li class="mb-1">
                 {{ m.nom }} {{ m.prenom }} — {{ m.email }}
-                <span class="badge bg-light text-dark ms-2">{{ m.role_code }}</span>
+                {% if m.role_libelle %}
+                  <span class="badge bg-light text-dark ms-2">{{ m.role_libelle }}</span>
+                {% else %}
+                  <span class="badge bg-secondary ms-2">Sans rôle</span>
+                {% endif %}
               </li>
             {% endfor %}
           </ul>
@@ -90,6 +94,7 @@
   <div class="col-12">
     <div class="card">
       <div class="card-body">
+
         <div class="d-flex justify-content-between align-items-center mb-2">
           <h5 class="mb-0">Notes par membre du jury</h5>
           <div>
@@ -108,13 +113,16 @@
                 <th class="text-end">Actions</th>
               </tr>
             </thead>
+
             <tbody>
-              {% for m in jury_membres %}
-                {% with nj=note_jury_map|get_item:m.id_responsable %}
+              {% for item in jury_items %}
+                {% with m=item.m nj=item.nj %}
                 <tr>
                   <td>
                     <strong>{{ m.nom }} {{ m.prenom }}</strong>
-                    <div class="text-muted small">{{ m.role_code }}</div>
+                    <div class="text-muted small">
+                      {% if m.role_libelle %}{{ m.role_libelle }}{% else %}Sans rôle{% endif %}
+                    </div>
                   </td>
 
                   <td>
@@ -155,7 +163,7 @@
                 </tr>
                 {% endwith %}
               {% empty %}
-              <tr><td colspan="4" class="text-center text-muted py-3">Aucun membre jury.</td></tr>
+                <tr><td colspan="4" class="text-center text-muted py-3">Aucun membre jury.</td></tr>
               {% endfor %}
             </tbody>
           </table>

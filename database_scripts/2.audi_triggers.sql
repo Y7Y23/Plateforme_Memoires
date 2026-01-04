@@ -477,3 +477,57 @@ BEGIN
 END $$;
 
 COMMIT;
+
+
+BEGIN;
+
+-- 1) Fonction : dès qu'une note arrive, on met la soutenance à EFFECTUEE
+CREATE OR REPLACE FUNCTION isms.fn_mark_soutenance_effectuee_from_note()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  -- Si on insère/modifie une note jury => soutenance devient EFFECTUEE
+  UPDATE isms.soutenance
+  SET statut = 'EFFECTUEE'
+  WHERE id_soutenance = NEW.id_soutenance
+    AND statut <> 'EFFECTUEE';
+
+  RETURN NEW;
+END;
+$$;
+
+
+-- 2) Trigger sur note_jury (avant contrôle)
+DROP TRIGGER IF EXISTS a00_mark_effectuee_note_jury ON isms.note_jury;
+
+CREATE TRIGGER a00_mark_effectuee_note_jury
+BEFORE INSERT OR UPDATE ON isms.note_jury
+FOR EACH ROW
+EXECUTE FUNCTION isms.fn_mark_soutenance_effectuee_from_note();
+
+
+-- 3) (Optionnel mais recommandé) Trigger sur note finale "note"
+--    si tu autorises saisir la note finale sans notes jury
+CREATE OR REPLACE FUNCTION isms.fn_mark_soutenance_effectuee_from_final()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  UPDATE isms.soutenance
+  SET statut = 'EFFECTUEE'
+  WHERE id_soutenance = NEW.id_soutenance
+    AND statut <> 'EFFECTUEE';
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS a00_mark_effectuee_note_finale ON isms.note;
+
+CREATE TRIGGER a00_mark_effectuee_note_finale
+BEFORE INSERT OR UPDATE ON isms.note
+FOR EACH ROW
+EXECUTE FUNCTION isms.fn_mark_soutenance_effectuee_from_final();
+
+COMMIT;

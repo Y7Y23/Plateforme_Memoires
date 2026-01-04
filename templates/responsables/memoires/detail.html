@@ -1,39 +1,92 @@
 {% extends "base_responsable.html" %}
-{% block title %}Détail mémoire{% endblock %}
 
 {% block content %}
+
 <div class="d-flex justify-content-between align-items-center mb-3">
   <div>
-    <h3 class="mb-0">{{ memoire.titre }}</h3>
-    <div class="text-muted">{{ memoire.type }} — Statut : {{ memoire.statut }}</div>
+    <h3 class="mb-0">Détail mémoire</h3>
+    <div class="text-muted">
+      Statut : <strong>{{ memoire.statut }}</strong> — Type : <strong>{{ memoire.type }}</strong>
+    </div>
   </div>
-  <a class="btn btn-outline-secondary" href="{% url 'responsable:memoire_list' %}">Retour</a>
+  <a href="{% url 'responsable:memoire_list' %}" class="btn btn-outline-secondary">Retour</a>
 </div>
 
-<div class="card">
-  <div class="card-body">
-    <p><strong>Étudiant :</strong> {{ memoire.etu_nom }} {{ memoire.etu_prenom }} ({{ memoire.etu_email }})</p>
-    <p><strong>Encadrement :</strong> {{ memoire.encadrement }}</p>
+<div class="row g-3">
 
-    <p><strong>Description :</strong><br>{{ memoire.description|default:"-" }}</p>
+  <!-- Mémoire -->
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="mb-2">{{ memoire.titre }}</h5>
+        {% if memoire.description %}
+          <p class="text-muted">{{ memoire.description }}</p>
+        {% else %}
+          <p class="text-muted">Aucune description.</p>
+        {% endif %}
 
-    {% if memoire.fichier_pdf %}
-      <p class="mb-2"><strong>PDF :</strong>
-        {# Si fichier_pdf stocke un chemin MEDIA (ex: memoires/x.pdf) #}
-        <a href="{{ MEDIA_URL }}{{ memoire.fichier_pdf }}" target="_blank">Ouvrir le PDF</a>
-      </p>
-      <small class="text-muted">Chemin: {{ memoire.fichier_pdf }}</small>
-    {% endif %}
+        <div class="mt-3">
+          {% if memoire.fichier_pdf %}
+            {# Si ton fichier_pdf contient déjà "memoires/....pdf" : #}
+            <a class="btn btn-outline-primary" href="{{ MEDIA_URL }}{{ memoire.fichier_pdf }}" target="_blank">
+              <i class="fa fa-file-pdf"></i> Voir PDF
+            </a>
+          {% else %}
+            <span class="text-muted">Aucun fichier PDF.</span>
+          {% endif %}
+        </div>
 
-    <hr>
+        <hr>
 
-    {% if request.session.role_code == "ENCADRANT" or request.session.role_code == "ADMIN" %}
-    <form method="post" action="{% url 'responsable:memoire_decision' memoire.id_memoire %}">
-      {% csrf_token %}
-      <button class="btn btn-success" name="decision" value="VALIDE" type="submit">Valider</button>
-      <button class="btn btn-danger" name="decision" value="REFUSE" type="submit">Refuser</button>
-    </form>
-    {% endif %}
+        <!-- Bouton Messagerie -->
+        <form method="post" action="{% url 'responsable:conversation_start' memoire.id_memoire %}">
+          {% csrf_token %}
+          <button class="btn btn-primary">
+            <i class="fas fa-comments"></i> Messagerie avec l’étudiant
+          </button>
+        </form>
+
+      </div>
+    </div>
   </div>
+
+  <!-- Étudiant -->
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5>Étudiant</h5>
+        <div><strong>Nom :</strong> {{ memoire.etu_nom }} {{ memoire.etu_prenom }}</div>
+        <div><strong>Email :</strong> {{ memoire.etu_email }}</div>
+        <div><strong>Matricule :</strong> {{ memoire.id_etudiant }}</div>
+
+        <hr>
+
+        <h6 class="mb-2">Encadrement</h6>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Responsable</th>
+                <th>Rôle</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for e in encadreurs %}
+              <tr>
+                <td>{{ e.nom }} {{ e.prenom }}</td>
+                <td><span class="badge bg-secondary">{{ e.encadrement }}</span></td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="2" class="text-muted">Aucun encadrement.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div>
+
 {% endblock %}
