@@ -52,6 +52,8 @@ urlpatterns = [
     path("etudiants/create/", views.etudiant_create, name="etudiant_create"),
     path("etudiants/<int:pk>/update/", views.etudiant_update, name="etudiant_update"),
     path("etudiants/<int:pk>/delete/", views.etudiant_delete, name="etudiant_delete"),
+    # Dans urls.py
+    path('etudiants/template/', views.etudiant_template_download, name='etudiant_template_download'),
 
 
     # Métier (placeholders pour éviter Reverse error)
@@ -61,6 +63,10 @@ urlpatterns = [
     path("memoires/<int:pk>/delete/", views.memoire_delete, name="memoire_delete"),
 
     path("soutenances/", views.soutenance_list, name="soutenance_list"),
+    path("soutenances/create/", views.soutenance_create, name="soutenance_create"),
+    path("soutenances/<int:pk>/update/", views.soutenance_update, name="soutenance_update"),
+    path("soutenances/<int:pk>/delete/", views.soutenance_delete, name="soutenance_delete"),
+
 
 
 
@@ -77,5 +83,31 @@ urlpatterns = [
         views.encadrement_delete,
         name="encadrement_delete",
     ),
+
+    # Jurys
+    path("jurys/", views.jury_list, name="jury_list"),
+    path("jurys/create/", views.jury_create, name="jury_create"),
+    path("jurys/<int:pk>/update/", views.jury_update, name="jury_update"),
+    path("jurys/<int:pk>/delete/", views.jury_delete, name="jury_delete"),
+
+
+
+    # Membres d'un jury (composition_jury)
+    path("jurys/<int:jury_id>/membres/", views.composition_jury_list, name="composition_jury_list"),
+    path("jurys/<int:jury_id>/membres/add/", views.composition_jury_add, name="composition_jury_add"),
+    path("jurys/<int:jury_id>/membres/<int:responsable_id>/remove/", views.composition_jury_remove, name="composition_jury_remove"),
+    path("jurys/<int:jury_id>/membres/clear/", views.composition_jury_clear, name="composition_jury_clear"),
+
+    # Notes (A→Z)
+    path("notes/", views.note_list, name="note_list"),
+    path("notes/<int:soutenance_id>/", views.note_detail, name="note_detail"),
+
+    # Note finale (create/update + delete)
+    path("notes/<int:soutenance_id>/final/save/", views.note_final_save, name="note_final_save"),
+    path("notes/<int:soutenance_id>/final/delete/", views.note_final_delete, name="note_final_delete"),
+
+    # Notes jury (save upsert + delete)
+    path("notes/<int:soutenance_id>/jury/save/", views.note_jury_save, name="note_jury_save"),
+    path("notes/<int:soutenance_id>/jury/delete/<int:responsable_id>/", views.note_jury_delete, name="note_jury_delete"),
 
 ]

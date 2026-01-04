@@ -1,0 +1,87 @@
+{% extends "base_admin.html" %}
+{% block content %}
+{% if messages %}
+  <div class="mb-3">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<h3 class="mb-3">Créer une soutenance</h3>
+
+<form method="post" class="card p-3">
+  {% csrf_token %}
+
+  <div class="row g-3">
+    <div class="col-md-4">
+      <label class="form-label">Date</label>
+      <input type="date" name="date_" class="form-control"
+             value="{{ data.date_|default:'' }}" required>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Heure</label>
+      <input type="time" name="heure" class="form-control"
+             value="{{ data.heure|default:'' }}" required>
+    </div>
+
+    <div class="col-md-4">
+      <label class="form-label">Statut</label>
+      <select name="statut" class="form-select" required>
+        {% for s in STATUTS %}
+          <option value="{{ s }}" {% if data.statut == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-12">
+      <label class="form-label">Mémoire</label>
+      <select name="id_memoire" class="form-select" required>
+        <option value="">-- Choisir un mémoire --</option>
+        {% for m in memoires %}
+          <option value="{{ m.id_memoire }}"
+                  {% if data.id_memoire|stringformat:"s" == m.id_memoire|stringformat:"s" %}selected{% endif %}>
+            #{{ m.id_memoire }} — {{ m.titre }} ({{ m.nom }} {{ m.prenom }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Jury</label>
+      <select name="id_jury" class="form-select" required>
+        <option value="">-- Choisir un jury --</option>
+        {% for j in jurys %}
+          <option value="{{ j.id_jury }}"
+                  {% if data.id_jury|stringformat:"s" == j.id_jury|stringformat:"s" %}selected{% endif %}>
+            {{ j.nom_jury }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label">Salle</label>
+      <select name="id_salle" class="form-select" required>
+        <option value="">-- Choisir une salle --</option>
+        {% for s in salles %}
+          <option value="{{ s.id_salle }}"
+                  {% if data.id_salle|stringformat:"s" == s.id_salle|stringformat:"s" %}selected{% endif %}>
+            {{ s.nom_salle }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="d-flex justify-content-end gap-2 mt-3">
+    <a href="{% url 'gestion:soutenance_list' %}" class="btn btn-outline-secondary">Annuler</a>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+  </div>
+</form>
+
+{% endblock %}

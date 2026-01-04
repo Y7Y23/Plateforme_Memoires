@@ -1,0 +1,39 @@
+{% extends "base_responsable.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Jurys</h3>
+</div>
+
+<form method="post" action="{% url 'responsable:jury_create' %}" class="row g-2 mb-3">
+  {% csrf_token %}
+  <div class="col-md-9">
+    <input class="form-control" name="nom_jury" placeholder="Nom du jury (ex: Jury PFE 1)" required>
+  </div>
+  <div class="col-md-3 d-grid">
+    <button class="btn btn-primary">Créer</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body table-responsive">
+    <table class="table table-striped align-middle">
+      <thead><tr><th>Nom</th><th>Membres</th><th></th></tr></thead>
+      <tbody>
+        {% for j in jurys %}
+        <tr>
+          <td>{{ j.nom_jury }}</td>
+          <td>{{ j.nb }}</td>
+          <td class="text-end">
+            <a class="btn btn-sm btn-outline-primary" href="{% url 'responsable:jury_members' j.id_jury %}">
+              Gérer
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" class="text-muted">Aucun jury.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

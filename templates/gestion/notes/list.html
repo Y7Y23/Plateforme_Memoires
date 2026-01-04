@@ -1,0 +1,78 @@
+{% extends "base_admin.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="mb-0">Notes</h3>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-6">
+    <input type="text" name="q" value="{{ q }}" class="form-control"
+           placeholder="Rechercher (matricule, étudiant, mémoire, jury...)">
+  </div>
+  <div class="col-md-3">
+    <select name="statut" class="form-select">
+      <option value="">-- Tous statuts --</option>
+      {% for s in STATUTS %}
+        <option value="{{ s }}" {% if statut == s %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3 d-flex gap-2">
+    <button class="btn btn-outline-primary w-100">Filtrer</button>
+    <a class="btn btn-outline-secondary w-100" href="{% url 'gestion:note_list' %}">Reset</a>
+  </div>
+</form>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover align-middle">
+    <thead>
+      <tr>
+        <th>Soutenance</th>
+        <th>Date</th>
+        <th>Étudiant (Matricule)</th>
+        <th>Mémoire</th>
+        <th>Jury / Salle</th>
+        <th>Moyenne</th>
+        <th>Note finale</th>
+        <th class="text-end">Détails</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td>#{{ r.id_soutenance }}</td>
+        <td>{{ r.date_ }} {{ r.heure }}</td>
+        <td>
+          <strong>{{ r.id_etudiant }}</strong><br>
+          {{ r.etu_nom }} {{ r.etu_prenom }}
+        </td>
+        <td>{{ r.titre }}</td>
+        <td>{{ r.nom_jury }}<br><small class="text-muted">{{ r.nom_salle }}</small></td>
+        <td>
+          {% if r.moyenne_harmonisee is not None %}
+            {{ r.moyenne_harmonisee }}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if r.note_finale is not None %}
+            <strong>{{ r.note_finale }}</strong>
+          {% else %}
+            <span class="text-muted">Non validée</span>
+          {% endif %}
+        </td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary"
+             href="{% url 'gestion:note_detail' r.id_soutenance %}">Voir</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" class="text-center text-muted py-4">Aucune donnée.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

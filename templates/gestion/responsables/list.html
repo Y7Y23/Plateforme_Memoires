@@ -35,14 +35,26 @@
           <input type="password" class="form-control" name="mot_de_pass" required>
         </div>
 
-        <div class="col-md-4">
-          <label class="form-label">Rôle</label>
-          <select class="form-select" name="id_role" required>
-            <option value="">-- Choisir --</option>
+        <!-- ✅ NOUVEAU : Sélection multiple des rôles -->
+        <div class="col-md-8">
+          <label class="form-label">Rôles <small class="text-muted">(sélection multiple)</small></label>
+          <div class="row">
             {% for ro in roles %}
-              <option value="{{ ro.id_role }}">{{ ro.code }}</option>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="role_ids" 
+                         value="{{ ro.id_role }}" id="role_{{ ro.id_role }}">
+                  <label class="form-check-label" for="role_{{ ro.id_role }}">
+                    {{ ro.code }}
+                    {% if ro.libelle %}
+                      <small class="text-muted">({{ ro.libelle }})</small>
+                    {% endif %}
+                  </label>
+                </div>
+              </div>
             {% endfor %}
-          </select>
+          </div>
+          <small class="form-text text-muted">Sélectionnez au moins un rôle</small>
         </div>
 
         <div class="col-md-4 d-flex align-items-center">
@@ -54,8 +66,8 @@
           </div>
         </div>
 
-        <div class="col-md-4 d-flex align-items-end">
-          <button class="btn btn-primary w-100">Ajouter</button>
+        <div class="col-12">
+          <button class="btn btn-primary">Ajouter</button>
         </div>
       </div>
     </form>
@@ -74,7 +86,7 @@
             <th>#</th>
             <th>Nom</th>
             <th>Email</th>
-            <th>Rôle</th>
+            <th>Rôles</th>
             <th>Admin</th>
             <th class="text-end">Actions</th>
           </tr>
@@ -86,7 +98,18 @@
               <td>{{ r.id_responsable }}</td>
               <td>{{ r.nom }} {{ r.prenom }}</td>
               <td>{{ r.email }}</td>
-              <td><span class="badge bg-secondary">{{ r.role_code }}</span></td>
+              
+              <!-- ✅ NOUVEAU : Affichage des rôles multiples -->
+              <td>
+                {% if r.role_codes %}
+                  {% for code in r.role_codes %}
+                    <span class="badge bg-secondary me-1">{{ code }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="badge bg-light text-dark">Aucun rôle</span>
+                {% endif %}
+              </td>
+              
               <td>
                 {% if r.is_admin %}
                   <span class="badge bg-success">Oui</span>
@@ -94,6 +117,7 @@
                   <span class="badge bg-light text-dark">Non</span>
                 {% endif %}
               </td>
+              
               <td class="text-end">
                 <a class="btn btn-sm btn-outline-primary"
                    href="{% url 'gestion:responsable_update' r.id_responsable %}">

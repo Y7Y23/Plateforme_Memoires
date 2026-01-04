@@ -1,0 +1,304 @@
+{% extends "base_admin.html" %}
+{% block content %}
+
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <!-- Header -->
+      <div class="d-flex align-items-center mb-4">
+        <div class="me-auto">
+          <h2 class="mb-1">Créer un jury</h2>
+          <p class="text-muted mb-0">Composez un nouveau jury en sélectionnant les membres responsables</p>
+        </div>
+        <a href="{% url 'gestion:jury_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left me-2"></i>Retour
+        </a>
+      </div>
+
+      <!-- Form Card -->
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <form method="post" id="juryForm">
+            {% csrf_token %}
+
+            <!-- Nom du jury -->
+            <div class="mb-4">
+              <label for="nom_jury" class="form-label fw-semibold">
+                Nom du jury <span class="text-danger">*</span>
+              </label>
+              <input type="text"
+                     id="nom_jury"
+                     name="nom_jury"
+                     class="form-control form-control-lg"
+                     placeholder="Ex: Jury Session Juin 2026"
+                     value="{{ data.nom_jury|default:'' }}"
+                     required
+                     autofocus>
+            </div>
+
+            <!-- Membres du jury -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <label class="form-label fw-semibold mb-0">
+                  Membres du jury <span class="text-danger">*</span>
+                </label>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-outline-primary" id="selectAll">
+                    <i class="bi bi-check-all me-1"></i>Tout sélectionner
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" id="deselectAll">
+                    <i class="bi bi-x-lg me-1"></i>Tout désélectionner
+                  </button>
+                </div>
+              </div>
+
+              <!-- Search box -->
+              <div class="mb-3">
+                <div class="input-group">
+                  <span class="input-group-text bg-light border-end-0">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" 
+                         class="form-control border-start-0 ps-0" 
+                         id="searchMembre"
+                         placeholder="Rechercher un membre par nom, prénom ou email...">
+                </div>
+              </div>
+
+              <!-- Members list -->
+              <div class="border rounded bg-light p-3" style="max-height: 400px; overflow-y: auto;">
+                <div id="membersContainer">
+                  {% for r in responsables %}
+                    <div class="membre-item form-check p-3 mb-2 bg-white rounded border hover-shadow" 
+                         data-search="{{ r.nom|lower }} {{ r.prenom|lower }} {{ r.email|lower }} {{ r.role_code|lower|default:'' }}">
+                      <input class="form-check-input membre-checkbox" 
+                             type="checkbox" 
+                             name="membres" 
+                             value="{{ r.id_responsable }}"
+                             id="membre_{{ r.id_responsable }}"
+                             {% if r.id_responsable|stringformat:"s" in selected_membres %}checked{% endif %}>
+                      <label class="form-check-label w-100 cursor-pointer" for="membre_{{ r.id_responsable }}">
+                        <div class="d-flex align-items-center">
+                          <div class="flex-grow-1">
+                            <div class="fw-semibold text-dark">
+                              {{ r.nom }} {{ r.prenom }}
+                            </div>
+                            <div class="small text-muted">
+                              <i class="bi bi-envelope me-1"></i>{{ r.email }}
+                            </div>
+                          </div>
+                          <!-- Affichage des rôles (simple) -->
+                          {% if r.role_code %}
+                            <span class="badge bg-primary-subtle text-primary">
+                              {{ r.role_code }}
+                            </span>
+                          {% else %}
+                            <span class="badge bg-light text-muted">Aucun rôle</span>
+                          {% endif %}
+                        </div>
+                      </label>
+                    </div>
+                  {% empty %}
+                    <div class="text-center text-muted py-4">
+                      <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                      Aucun responsable disponible
+                    </div>
+                  {% endfor %}
+                </div>
+                <div id="noResults" class="text-center text-muted py-4" style="display: none;">
+                  <i class="bi bi-search fs-1 d-block mb-2"></i>
+                  Aucun membre trouvé
+                </div>
+              </div>
+
+              <!-- Selection count -->
+              <div id="selection-info" class="mt-3 p-3 bg-primary-subtle border border-primary rounded" style="display: none;">
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-info-circle-fill text-primary fs-5 me-2"></i>
+                  <span class="fw-semibold text-primary">
+                    <span id="count">0</span> membre(s) sélectionné(s)
+                  </span>
+                </div>
+              </div>
+
+              <div id="validation-error" class="mt-2 text-danger small" style="display: none;">
+                <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                Veuillez sélectionner au moins un membre
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+              <small class="text-muted">
+                <span class="text-danger">*</span> Champs obligatoires
+              </small>
+              <div class="d-flex gap-2">
+                <a href="{% url 'gestion:jury_list' %}" class="btn btn-lg btn-outline-secondary">
+                  Annuler
+                </a>
+                <button type="submit" class="btn btn-lg btn-primary px-4">
+                  <i class="bi bi-check-lg me-2"></i>Créer le jury
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Info Card -->
+      <div class="alert alert-info border-0 mt-3" role="alert">
+        <div class="d-flex">
+          <i class="bi bi-lightbulb-fill fs-4 me-3"></i>
+          <div>
+            <h6 class="alert-heading mb-1">Conseil</h6>
+            <p class="mb-0 small">
+              Un jury doit comporter au moins un membre. Vous pourrez modifier la composition 
+              ultérieurement depuis la liste des jurys.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.membre-checkbox');
+    const countDisplay = document.getElementById('selection-info');
+    const countText = document.getElementById('count');
+    const selectAllBtn = document.getElementById('selectAll');
+    const deselectAllBtn = document.getElementById('deselectAll');
+    const searchInput = document.getElementById('searchMembre');
+    const membreItems = document.querySelectorAll('.membre-item');
+    const noResults = document.getElementById('noResults');
+    const membersContainer = document.getElementById('membersContainer');
+    const form = document.getElementById('juryForm');
+    const validationError = document.getElementById('validation-error');
+    
+    // Update selection count
+    function updateCount() {
+      const selected = Array.from(checkboxes).filter(cb => cb.checked).length;
+      countText.textContent = selected;
+      countDisplay.style.display = selected > 0 ? 'block' : 'none';
+      validationError.style.display = 'none';
+    }
+    
+    // Select all
+    selectAllBtn.addEventListener('click', function() {
+      membreItems.forEach(item => {
+        if (item.style.display !== 'none') {
+          const checkbox = item.querySelector('.membre-checkbox');
+          checkbox.checked = true;
+        }
+      });
+      updateCount();
+    });
+    
+    // Deselect all
+    deselectAllBtn.addEventListener('click', function() {
+      checkboxes.forEach(cb => cb.checked = false);
+      updateCount();
+    });
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase().trim();
+      let visibleCount = 0;
+      
+      membreItems.forEach(item => {
+        const searchData = item.getAttribute('data-search');
+        if (searchData.includes(searchTerm)) {
+          item.style.display = 'block';
+          visibleCount++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+      
+      membersContainer.style.display = visibleCount > 0 ? 'block' : 'none';
+      noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+      const selected = Array.from(checkboxes).filter(cb => cb.checked).length;
+      if (selected === 0) {
+        e.preventDefault();
+        validationError.style.display = 'block';
+        document.getElementById('membersContainer').scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+    
+    // Update count on checkbox change
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', updateCount);
+    });
+    
+    // Initial count
+    updateCount();
+  });
+</script>
+
+<style>
+  .membre-item {
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .membre-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
+  }
+  
+  .membre-item .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .membre-item .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+  }
+  
+  .cursor-pointer {
+    cursor: pointer;
+  }
+  
+  .hover-shadow {
+    transition: box-shadow 0.2s ease;
+  }
+  
+  kbd {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.875rem;
+    border-radius: 0.25rem;
+  }
+
+  /* Custom scrollbar */
+  .border.rounded.bg-light::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .border.rounded.bg-light::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  .border.rounded.bg-light::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  .border.rounded.bg-light::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+</style>
+
+{% endblock %}
+
+

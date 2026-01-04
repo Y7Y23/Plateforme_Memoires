@@ -1,5 +1,5 @@
 -- =========================================================
--- 04_security_roles.sql (MAJ ROLE)
+-- 04_security_roles.sql (VERSION CORRIGÉE)
 -- Projet ISMS - Sécurité: rôles + permissions + vues sécurisées
 -- =========================================================
 
@@ -65,6 +65,7 @@ GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA isms TO app_user;
 GRANT INSERT, UPDATE ON isms.memoire TO app_user;
 GRANT INSERT, UPDATE ON isms.soutenance TO app_user;
 GRANT INSERT, UPDATE ON isms.note TO app_user;
+GRANT INSERT, UPDATE ON isms.note_jury TO app_user;
 
 GRANT INSERT, UPDATE, DELETE ON isms.encadrement TO app_user;
 GRANT INSERT, UPDATE, DELETE ON isms.composition_jury TO app_user;
@@ -72,6 +73,7 @@ GRANT INSERT, UPDATE, DELETE ON isms.composition_jury TO app_user;
 -- selon ton besoin: création/MAJ des acteurs via app
 GRANT INSERT, UPDATE ON isms.etudiant TO app_user;
 GRANT INSERT, UPDATE ON isms.responsable TO app_user;
+GRANT INSERT, UPDATE, DELETE ON isms.responsable_role TO app_user;
 
 -- Tables de référence : lecture seule (annee, salle, departement, niveau, role, jury)
 -- (donc pas de write ici)
@@ -95,25 +97,37 @@ REVOKE SELECT ON isms.responsable FROM app_user;
 
 -- Vues sécurisées (sans mot_de_pass)
 
+-- ✅ Vue étudiant (SANS colonne filiere qui n'existe pas)
 CREATE OR REPLACE VIEW isms.v_etudiant_public AS
 SELECT
-  id_etudiant, nom, prenom, email, telephone, filiere, niveau,
-  id_departement, id_annee, created_at, updated_at
+  id_etudiant,
+  nom,
+  prenom,
+  email,
+  telephone,
+  niveau,
+  id_departement,
+  id_annee,
+  created_at,
+  updated_at
 FROM isms.etudiant;
 
+-- ✅ Vue responsable avec rôles via responsable_role (Many-to-Many)
 CREATE OR REPLACE VIEW isms.v_responsable_public AS
 SELECT
   r.id_responsable,
   r.nom,
   r.prenom,
   r.email,
-  r.id_role,
-  ro.code    AS role_code,
-  ro.libelle AS role_libelle,
+  r.is_admin,
   r.created_at,
-  r.updated_at
+  r.updated_at,
+  STRING_AGG(ro.code, ', ' ORDER BY ro.code) AS roles_codes,
+  STRING_AGG(ro.libelle, ', ' ORDER BY ro.libelle) AS roles_libelles
 FROM isms.responsable r
-JOIN isms.role ro ON ro.id_role = r.id_role;
+LEFT JOIN isms.responsable_role rr ON rr.id_responsable = r.id_responsable
+LEFT JOIN isms.role ro ON ro.id_role = rr.id_role
+GROUP BY r.id_responsable, r.nom, r.prenom, r.email, r.is_admin, r.created_at, r.updated_at;
 
 GRANT SELECT ON isms.v_etudiant_public TO app_user;
 GRANT SELECT ON isms.v_responsable_public TO app_user;

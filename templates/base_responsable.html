@@ -1,0 +1,475 @@
+{% load static %}
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{% block title %}Espace Responsable - ISMS{% endblock %}</title>
+
+  <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/kaiadmin.min.css' %}">
+  <link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  {% block extra_css %}{% endblock %}
+
+  <style>
+      .logo-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .logo-link:hover .logo-text {
+      opacity: 0.8;
+      transition: opacity 0.2s ease;
+    }
+    :root {
+      --primary-color: #1572e8;
+      --success-color: #31ce36;
+      --warning-color: #ffad46;
+      --danger-color: #ff4d4d;
+      --sidebar-bg: #1a1d2e;
+      --sidebar-hover: #252a41;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      height: 100vh;
+      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: linear-gradient(180deg, #1a1d2e 0%, #151825 100%);
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-logo {
+      flex-shrink: 0;
+      padding: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .sidebar-logo .logo-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sidebar-logo .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: transparent;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .sidebar-logo .subtitle {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .user-info-card {
+      margin-top: 1rem;
+      padding: 0.875rem;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .user-info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 0.813rem;
+    }
+
+    .user-info-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .user-info-item i {
+      color: var(--primary-color);
+      width: 16px;
+      font-size: 0.875rem;
+    }
+
+    .user-info-item .label {
+      color: rgba(255, 255, 255, 0.5);
+      font-weight: 500;
+    }
+
+    .user-info-item .value {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: linear-gradient(135deg, var(--primary-color) 0%, #0d5dbf 100%);
+      color: white;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .role-badge.admin {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+    }
+
+    .role-badge.president {
+      background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    }
+
+    .role-badge.encadrant {
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
+
+    .role-badge.membre_jury {
+      background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+    }
+
+    .sidebar-wrapper {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+      padding: 1rem 0;
+    }
+
+    .sidebar-wrapper .nav {
+      padding-bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Custom scrollbar */
+    .sidebar-wrapper::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .sidebar-wrapper::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    .sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .nav-section {
+      padding: 1rem 1.5rem 0.5rem;
+    }
+
+    .nav-section .text-section {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+
+    .nav-item {
+      margin: 0.25rem 0.75rem;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-size: 0.938rem;
+    }
+
+    .nav-item a:hover {
+      background: var(--sidebar-hover);
+      color: #fff;
+      transform: translateX(2px);
+    }
+
+    .nav-item.active a {
+      background: linear-gradient(135deg, var(--success-color) 0%, #28a745 100%);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(49, 206, 54, 0.3);
+    }
+
+    .nav-item a i {
+      width: 20px;
+      margin-right: 0.75rem;
+      font-size: 1rem;
+    }
+
+    .nav-item a p {
+      margin: 0;
+      font-weight: 500;
+    }
+
+    /* Disabled menu items */
+    .nav-item a[onclick="return false;"] {
+      opacity: 0.5;
+      cursor: not-allowed;
+      position: relative;
+    }
+
+    .nav-item a[onclick="return false;"]:hover {
+      transform: none;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Logout button styling */
+    .nav-item .btn-link {
+      width: 100%;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      color: var(--danger-color);
+      text-decoration: none;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-size: 0.938rem;
+      border: 1px solid rgba(255, 77, 77, 0.2);
+      background: rgba(255, 77, 77, 0.05);
+    }
+
+    .nav-item .btn-link:hover {
+      background: rgba(255, 77, 77, 0.15);
+      border-color: rgba(255, 77, 77, 0.4);
+      transform: translateX(2px);
+    }
+
+    .nav-item .btn-link i {
+      width: 20px;
+      margin-right: 0.75rem;
+      font-size: 1rem;
+    }
+
+    /* Main panel */
+    .main-panel {
+      margin-left: 260px;
+      min-height: 100vh;
+      background: #f8f9fa;
+    }
+
+    .content {
+      padding: 2rem;
+    }
+
+    .page-inner {
+      max-width: 1400px;
+    }
+
+    /* Alert styling */
+    .alert {
+      border-radius: 8px;
+      border: none;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .alert-danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .alert-info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+        transform: translateX(-260px);
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-panel {
+        margin-left: 0;
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <div class="sidebar" data-background-color="dark">
+      <div class="sidebar-logo">
+        <a href="{% url 'responsable:dashboard' %}" class="logo-text" style="text-decoration:none;">
+          <div class="logo-icon">
+            <img src="{% static 'assets/img/logo.png' %}" alt="ISMS Logo">
+          </div>
+          ISMS
+        </a>
+      </div>
+
+      {% with current=request.resolver_match.url_name %}
+      <div class="sidebar-wrapper scrollbar-inner">
+        <ul class="nav nav-secondary">
+
+          <li class="nav-item {% if current == 'dashboard' %}active{% endif %}">
+            <a href="{% url 'responsable:dashboard' %}">
+              <i class="fas fa-home"></i>
+              <p>Dashboard</p>
+            </a>
+          </li>
+
+          {# ========================= #}
+          {# ENCADRANT / CO-ENCADRANT  #}
+          {# ========================= #}
+          {% if request.session.is_admin %}
+            <li class="nav-section">
+              <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+              <h4 class="text-section">Encadrement</h4>
+            </li>
+            <li class="nav-item {% if current == 'memoire_list' or current == 'memoire_detail' %}active{% endif %}">
+              <a href="{% url 'responsable:memoire_list' %}">
+                <i class="fas fa-book"></i>
+                <p>Mes mémoires</p>
+              </a>
+            </li>
+          {% else %}
+            {% if request.session.role_codes %}
+              {% if "ENCADRANT" in request.session.role_codes %}
+                <li class="nav-section">
+                  <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                  <h4 class="text-section">Encadrement</h4>
+                </li>
+                <li class="nav-item {% if current == 'memoire_list' or current == 'memoire_detail' %}active{% endif %}">
+                  <a href="{% url 'responsable:memoire_list' %}">
+                    <i class="fas fa-book"></i>
+                    <p>Mes mémoires</p>
+                  </a>
+                </li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+
+          {# ========================= #}
+          {# MEMBRE_JURY              #}
+          {# ========================= #}
+          {% if request.session.is_admin %}
+            <li class="nav-section">
+              <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+              <h4 class="text-section">Jury</h4>
+            </li>
+            <li class="nav-item {% if current == 'my_soutenances' or current == 'my_soutenance_detail' %}active{% endif %}">
+              <a href="{% url 'responsable:my_soutenances' %}">
+                <i class="fas fa-clipboard-list"></i>
+                <p>Mes soutenances</p>
+              </a>
+            </li>
+          {% else %}
+            {% if request.session.role_codes %}
+              {% if "MEMBRE_JURY" in request.session.role_codes %}
+                <li class="nav-section">
+                  <span class="sidebar-mini-icon"><i class="fa fa-ellipsis-h"></i></span>
+                  <h4 class="text-section">Jury</h4>
+                </li>
+                <li class="nav-item {% if current == 'my_soutenances' or current == 'my_soutenance_detail' %}active{% endif %}">
+                  <a href="{% url 'responsable:my_soutenances' %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <p>Mes soutenances</p>
+                  </a>
+                </li>
+              {% endif %}
+            {% endif %}
+          {% endif %}
+
+          <li class="nav-item mt-3">
+            <form method="post" action="{% url 'accounts:logout' %}" class="d-inline w-100">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-link text-danger">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Déconnexion</span>
+              </button>
+            </form>
+          </li>
+
+        </ul>
+      </div>
+      {% endwith %}
+    </div>
+
+    <div class="main-panel">
+      <div class="content">
+        <div class="page-inner">
+          {% if messages %}
+            {% for m in messages %}
+              <div class="alert alert-{{ m.tags }} alert-dismissible fade show" role="alert">
+                {{ m }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="{% static 'assets/js/core/jquery-3.7.1.min.js' %}"></script>
+  <script src="{% static 'assets/js/core/popper.min.js' %}"></script>
+  <script src="{% static 'assets/js/core/bootstrap.min.js' %}"></script>
+  <script src="{% static 'assets/js/kaiadmin.min.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

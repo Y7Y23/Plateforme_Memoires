@@ -1,0 +1,36 @@
+{% extends "base_etudiant.html" %}
+{% block content %}
+
+<h3>Déposer un mémoire</h3>
+
+<form method="post" enctype="multipart/form-data" class="card p-4">
+  {% csrf_token %}
+
+  <div class="mb-3">
+    <label class="form-label">Titre</label>
+    <input class="form-control" name="titre" value="{{ data.titre }}">
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Type</label>
+    <select class="form-select" name="type">
+      {% for t in types %}
+        <option value="{{ t }}">{{ t }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea class="form-control" name="description">{{ data.description }}</textarea>
+  </div>
+
+  <div class="mb-3">
+    <label class="form-label">Fichier PDF</label>
+    <input type="file" class="form-control" name="fichier_pdf" accept="application/pdf">
+  </div>
+
+  <button class="btn btn-success">Déposer</button>
+</form>
+
+{% endblock %}

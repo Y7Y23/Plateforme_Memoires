@@ -1,0 +1,26 @@
+{% extends "base_admin.html" %}
+{% block content %}
+
+<h3 class="mb-3 text-danger">Supprimer le jury</h3>
+
+<div class="card p-3">
+  <p>Confirmer la suppression de :</p>
+
+  <ul class="list-group mb-3">
+    <li class="list-group-item d-flex justify-content-between">
+      <span><strong>ID</strong></span>
+      <span>#{{ row.id_jury }}</span>
+    </li>
+    <li class="list-group-item">
+      <strong>Nom</strong> : {{ row.nom_jury }}
+    </li>
+  </ul>
+
+  <form method="post" class="d-flex justify-content-end gap-2">
+    {% csrf_token %}
+    <a href="{% url 'gestion:jury_list' %}" class="btn btn-outline-secondary">Annuler</a>
+    <button type="submit" class="btn btn-danger">Supprimer</button>
+  </form>
+</div>
+
+{% endblock %}

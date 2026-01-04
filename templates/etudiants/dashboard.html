@@ -1,0 +1,42 @@
+{% extends "base_etudiant.html" %}
+{% block content %}
+
+<h3 class="mb-4">Dashboard — {{ annee_libelle }}</h3>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card text-center"><div class="card-body">
+      <h5>{{ stats.total }}</h5><small>Total mémoires</small>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-warning text-center"><div class="card-body">
+      <h5>{{ stats.attente }}</h5><small>En attente</small>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-success text-center"><div class="card-body">
+      <h5>{{ stats.valides }}</h5><small>Validés</small>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-danger text-center"><div class="card-body">
+      <h5>{{ stats.refuses }}</h5><small>Refusés</small>
+    </div></div>
+  </div>
+</div>
+
+{% if soutenance %}
+<div class="card">
+  <div class="card-header"><strong>Ma soutenance</strong></div>
+  <div class="card-body">
+    <p><strong>Mémoire :</strong> {{ soutenance.titre }}</p>
+    <p><strong>Date :</strong> {{ soutenance.date_ }} {{ soutenance.heure }}</p>
+    <p><strong>Salle :</strong> {{ soutenance.nom_salle }}</p>
+    <p><strong>Jury :</strong> {{ soutenance.nom_jury }}</p>
+    <span class="badge bg-info">{{ soutenance.statut }}</span>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -16,32 +16,46 @@
           <label class="form-label">Nom</label>
           <input class="form-control" name="nom" value="{{ resp.nom }}" required>
         </div>
+        
         <div class="col-md-4">
           <label class="form-label">Prénom</label>
           <input class="form-control" name="prenom" value="{{ resp.prenom }}" required>
         </div>
+        
         <div class="col-md-4">
           <label class="form-label">Email</label>
           <input class="form-control" name="email" value="{{ resp.email }}" required>
         </div>
 
-        <div class="col-md-6">
-          <label class="form-label">Rôle</label>
-          <select class="form-select" name="id_role" required>
+        <!-- ✅ NOUVEAU : Sélection multiple des rôles avec rôles actuels cochés -->
+        <div class="col-12">
+          <label class="form-label">Rôles <small class="text-muted">(sélection multiple)</small></label>
+          <div class="row">
             {% for ro in roles %}
-              <option value="{{ ro.id_role }}" {% if ro.id_role == resp.id_role %}selected{% endif %}>
-                {{ ro.code }}
-              </option>
+              <div class="col-md-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="role_ids" 
+                         value="{{ ro.id_role }}" id="role_{{ ro.id_role }}"
+                         {% if ro.id_role in current_roles %}checked{% endif %}>
+                  <label class="form-check-label" for="role_{{ ro.id_role }}">
+                    {{ ro.code }}
+                    {% if ro.libelle %}
+                      <small class="text-muted">({{ ro.libelle }})</small>
+                    {% endif %}
+                  </label>
+                </div>
+              </div>
             {% endfor %}
-          </select>
+          </div>
+          <small class="form-text text-muted">Sélectionnez au moins un rôle</small>
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">Nouveau mot de passe (optionnel)</label>
+          <label class="form-label">Nouveau mot de passe <small class="text-muted">(optionnel)</small></label>
           <input class="form-control" name="mot_de_pass" placeholder="Laisser vide pour ne pas changer">
         </div>
 
-        <div class="col-12">
+        <div class="col-md-6 d-flex align-items-center">
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin"
                    {% if resp.is_admin %}checked{% endif %}>
@@ -57,4 +71,21 @@
     </form>
   </div>
 </div>
+
+<!-- ✅ BONUS : Afficher un aperçu des rôles actuels -->
+<div class="card mt-3">
+  <div class="card-body">
+    <h6 class="card-title">Rôles actuels :</h6>
+    {% if current_roles %}
+      {% for ro in roles %}
+        {% if ro.id_role in current_roles %}
+          <span class="badge bg-info me-1">{{ ro.code }}</span>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <span class="text-muted">Aucun rôle assigné</span>
+    {% endif %}
+  </div>
+</div>
+
 {% endblock %}

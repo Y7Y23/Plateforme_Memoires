@@ -370,49 +370,28 @@ END $$;
 
 -- E6) Vérifier jury “valide” avant d’affecter à une soutenance
 -- - au moins 3 membres
--- - au moins 1 PRESIDENT et 1 RAPPORTEUR (via table role)
-CREATE OR REPLACE FUNCTION fn_check_jury_composition_for_soutenance()
-RETURNS TRIGGER
+-- - au moins 1 PRESIDENT et 1 RAPPORTEUR (via table role)-- Corriger UNIQUEMENT la fonction E6
+CREATE OR REPLACE FUNCTION isms.fn_check_jury_composition_for_soutenance()
+RETURNS trigger
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  v_total INT;
-  v_pres  INT;
-  v_rap   INT;
+    nb_membres INT;
 BEGIN
-  SELECT COUNT(*) INTO v_total
-  FROM composition_jury
-  WHERE id_jury = NEW.id_jury;
+    -- Nombre de membres dans le jury choisi
+    SELECT COUNT(*)
+    INTO nb_membres
+    FROM isms.composition_jury
+    WHERE id_jury = NEW.id_jury;
 
-  SELECT COUNT(*) INTO v_pres
-  FROM composition_jury cj
-  JOIN responsable r ON r.id_responsable = cj.id_responsable
-  JOIN role ro       ON ro.id_role = r.id_role
-  WHERE cj.id_jury = NEW.id_jury
-    AND ro.code = 'PRESIDENT';
+    -- ✅ Nouvelle règle (sans PRESIDENT)
+    IF nb_membres < 1 THEN
+        RAISE EXCEPTION 'Jury invalide: il faut au moins 1 membre.';
+    END IF;
 
-  SELECT COUNT(*) INTO v_rap
-  FROM composition_jury cj
-  JOIN responsable r ON r.id_responsable = cj.id_responsable
-  JOIN role ro       ON ro.id_role = r.id_role
-  WHERE cj.id_jury = NEW.id_jury
-    AND ro.code = 'RAPPORTEUR';
+    RETURN NEW;
+END $$;
 
-  IF v_total < 3 THEN
-    RAISE EXCEPTION 'Jury invalide: il faut au moins 3 membres (actuel=%).', v_total;
-  END IF;
-
-  IF v_pres < 1 THEN
-    RAISE EXCEPTION 'Jury invalide: il faut au moins 1 PRESIDENT.';
-  END IF;
-
-  IF v_rap < 1 THEN
-    RAISE EXCEPTION 'Jury invalide: il faut au moins 1 RAPPORTEUR.';
-  END IF;
-
-  RETURN NEW;
-END;
-$$;
 
 DO $$
 BEGIN

@@ -1,0 +1,219 @@
+{% extends "base_admin.html" %}
+{% load extras %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="mb-0">Détails des notes — Soutenance #{{ base.id_soutenance }}</h3>
+    <div class="text-muted">
+      Date : {{ base.date_ }} {{ base.heure }} — Salle : {{ base.nom_salle }} — Statut : {{ base.statut }}
+    </div>
+  </div>
+  <a href="{% url 'gestion:note_list' %}" class="btn btn-outline-secondary">Retour</a>
+</div>
+
+<div class="row g-3">
+
+  <!-- ETUDIANT -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5>Étudiant</h5>
+        <div><strong>Matricule :</strong> {{ base.id_etudiant }}</div>
+        <div><strong>Nom :</strong> {{ base.etu_nom }} {{ base.etu_prenom }}</div>
+        <div><strong>Email :</strong> {{ base.etu_email }}</div>
+        {% if base.telephone %}<div><strong>Tél :</strong> {{ base.telephone }}</div>{% endif %}
+        {% if base.filiere %}<div><strong>Filière :</strong> {{ base.filiere }}</div>{% endif %}
+        {% if base.niveau %}<div><strong>Niveau :</strong> {{ base.niveau }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMOIRE -->
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5>Mémoire</h5>
+        <div><strong>ID :</strong> {{ base.id_memoire }}</div>
+        <div><strong>Titre :</strong> {{ base.titre }}</div>
+        <div><strong>Type :</strong> {{ base.type }}</div>
+        <div><strong>Statut :</strong> {{ base.mem_statut }}</div>
+        <div><strong>Date dépôt :</strong> {{ base.date_depot }}</div>
+        {% if base.description %}<div class="mt-2 text-muted">{{ base.description }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ENCADREMENTS -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5>Encadrements</h5>
+        {% if encadrements %}
+          <ul class="mb-0">
+            {% for en in encadrements %}
+              <li>
+                <strong>{{ en.encadrement }}</strong> :
+                {{ en.nom }} {{ en.prenom }} ({{ en.email }})
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">Aucun encadrement.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- JURY -->
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h5>Jury : {{ base.nom_jury }}</h5>
+        {% if jury_membres %}
+          <ul class="mb-0">
+            {% for m in jury_membres %}
+              <li>
+                {{ m.nom }} {{ m.prenom }} — {{ m.email }}
+                <span class="badge bg-light text-dark ms-2">{{ m.role_code }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="text-muted">Aucun membre dans ce jury.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES JURY -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h5 class="mb-0">Notes par membre du jury</h5>
+          <div>
+            <strong>Moyenne harmonisée :</strong>
+            {% if moyenne is not None %} {{ moyenne }} {% else %}<span class="text-muted">—</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-striped align-middle">
+            <thead>
+              <tr>
+                <th>Membre</th>
+                <th style="width:130px;">Note /20</th>
+                <th>Commentaire</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for m in jury_membres %}
+                {% with nj=note_jury_map|get_item:m.id_responsable %}
+                <tr>
+                  <td>
+                    <strong>{{ m.nom }} {{ m.prenom }}</strong>
+                    <div class="text-muted small">{{ m.role_code }}</div>
+                  </td>
+
+                  <td>
+                    <form method="post" action="{% url 'gestion:note_jury_save' base.id_soutenance %}" class="d-flex gap-2">
+                      {% csrf_token %}
+                      <input type="hidden" name="id_responsable" value="{{ m.id_responsable }}">
+                      <input type="number" step="0.01" min="0" max="20"
+                             name="note"
+                             class="form-control form-control-sm"
+                             value="{% if nj %}{{ nj.note }}{% endif %}"
+                             required>
+                  </td>
+
+                  <td>
+                      <input type="text"
+                             name="commentaire"
+                             class="form-control form-control-sm"
+                             value="{% if nj %}{{ nj.commentaire|default_if_none:'' }}{% endif %}"
+                             placeholder="Commentaire...">
+                  </td>
+
+                  <td class="text-end">
+                      <button class="btn btn-sm btn-outline-primary" type="submit">Enregistrer</button>
+                    </form>
+
+                    {% if nj %}
+                    <form method="post"
+                          action="{% url 'gestion:note_jury_delete' base.id_soutenance m.id_responsable %}"
+                          class="d-inline">
+                      {% csrf_token %}
+                      <button class="btn btn-sm btn-outline-danger"
+                              onclick="return confirm('Supprimer la note de ce membre ?');">
+                        Supprimer
+                      </button>
+                    </form>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endwith %}
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-3">Aucun membre jury.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="text-muted small">
+          Astuce : laisse “Note finale” vide pour valider automatiquement avec la moyenne harmonisée.
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTE FINALE -->
+  <div class="col-12">
+    <div class="card">
+      <div class="card-body">
+        <h5>Note finale (officielle)</h5>
+
+        <form method="post" action="{% url 'gestion:note_final_save' base.id_soutenance %}" class="row g-2 align-items-end">
+          {% csrf_token %}
+
+          <div class="col-md-3">
+            <label class="form-label">Note finale /20</label>
+            <input type="number" step="0.01" min="0" max="20"
+                   name="note_finale" class="form-control"
+                   value="{{ base.note_finale|default_if_none:'' }}"
+                   placeholder="(vide = moyenne)">
+          </div>
+
+          <div class="col-md-7">
+            <label class="form-label">Commentaire final</label>
+            <input type="text" name="commentaire_final" class="form-control"
+                   value="{{ base.commentaire_final|default_if_none:'' }}"
+                   placeholder="Commentaire final...">
+          </div>
+
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100" type="submit">
+              {% if base.note_finale is None %}Valider{% else %}Mettre à jour{% endif %}
+            </button>
+          </div>
+        </form>
+
+        {% if base.note_finale is not None %}
+        <form method="post" action="{% url 'gestion:note_final_delete' base.id_soutenance %}" class="mt-2">
+          {% csrf_token %}
+          <button class="btn btn-outline-danger"
+                  onclick="return confirm('Supprimer la note finale ?');">
+            Supprimer la note finale
+          </button>
+        </form>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

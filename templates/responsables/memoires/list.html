@@ -1,0 +1,61 @@
+{% extends "base_responsable.html" %}
+{% block title %}Mes mémoires{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Mes mémoires</h3>
+
+<form class="row g-2 mb-3" method="get">
+  <div class="col-md-6">
+    <input class="form-control" name="q" placeholder="Recherche..." value="{{ q }}">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="statut">
+      <option value="">-- Statut --</option>
+      <option value="DEPOSE" {% if statut == "DEPOSE" %}selected{% endif %}>DEPOSE</option>
+      <option value="EN_VERIFICATION" {% if statut == "EN_VERIFICATION" %}selected{% endif %}>EN_VERIFICATION</option>
+      <option value="VALIDE" {% if statut == "VALIDE" %}selected{% endif %}>VALIDE</option>
+      <option value="REFUSE" {% if statut == "REFUSE" %}selected{% endif %}>REFUSE</option>
+    </select>
+  </div>
+  <div class="col-md-3 d-grid">
+    <button class="btn btn-primary" type="submit">Filtrer</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Étudiant</th>
+            <th>Statut</th>
+            <th>Type</th>
+            <th>Encadrement</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in memoires %}
+          <tr>
+            <td>{{ m.titre }}</td>
+            <td>{{ m.etu_nom }} {{ m.etu_prenom }}<br><small class="text-muted">{{ m.etu_email }}</small></td>
+            <td><span class="badge bg-secondary">{{ m.statut }}</span></td>
+            <td>{{ m.type }}</td>
+            <td>{{ m.encadrement }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'responsable:memoire_detail' m.id_memoire %}">
+                Détails
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="6" class="text-muted">Aucun mémoire.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

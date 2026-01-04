@@ -2,58 +2,255 @@
 {% block title %}Étudiants{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h3 class="mb-0">Étudiants</h3>
+<div class="container-fluid py-4">
+  <div class="row">
+    <div class="col-12">
+      
+      <!-- Header -->
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h3 class="mb-1">Gestion des Étudiants</h3>
+          <p class="text-muted mb-0">Créez et gérez les étudiants individuellement ou en masse</p>
+        </div>
 
-  <form method="get" class="d-flex gap-2">
-    <input class="form-control" name="q" value="{{ q }}" placeholder="Recherche nom/email...">
-    <button class="btn btn-outline-primary">OK</button>
-  </form>
+        <form method="get" class="d-flex gap-2">
+          <input class="form-control" name="q" value="{{ q }}" placeholder="Recherche nom/email..." style="width: 300px;">
+          <button class="btn btn-outline-primary" type="submit">
+            <i class="bi bi-search"></i> Rechercher
+          </button>
+        </form>
+      </div>
+
+      <!-- Bulk Upload Section -->
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-upload me-2"></i>Import en masse (Excel)
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <form method="post" action="{% url 'gestion:etudiant_create' %}" 
+                    enctype="multipart/form-data" id="bulkUploadForm">
+                {% csrf_token %}
+                <div class="d-flex gap-2 align-items-center">
+                  <input type="file" 
+                         class="form-control" 
+                         name="excel_file" 
+                         accept=".xlsx,.xls" 
+                         required
+                         id="excelFileInput">
+                  <button type="submit" class="btn btn-primary text-nowrap px-4">
+                    <i class="bi bi-upload me-2"></i>Importer
+                  </button>
+                </div>
+                <div class="form-text mt-2">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Formats acceptés : .xlsx, .xls | Le fichier doit suivre le modèle fourni
+                </div>
+              </form>
+            </div>
+            <div class="col-md-4 text-end">
+              <a href="{% url 'gestion:etudiant_template_download' %}" 
+                 class="btn btn-outline-success btn-lg">
+                <i class="bi bi-download me-2"></i>Télécharger le modèle Excel
+              </a>
+            </div>
+          </div>
+          
+          <!-- Instructions -->
+          <div class="alert alert-info border-0 mt-3 mb-0">
+            <h6 class="alert-heading">
+              <i class="bi bi-lightbulb-fill me-2"></i>Instructions d'import
+            </h6>
+            <ol class="mb-0 small ps-3">
+              <li><strong>Téléchargez le modèle Excel</strong> qui contient les départements et années universitaires disponibles</li>
+              <li><strong>Remplissez les colonnes obligatoires</strong> : Nom, Prénom, Email, Mot de passe, Département, Année Universitaire</li>
+              <li><strong>Colonnes optionnelles</strong> : Téléphone, Filière, Niveau</li>
+              <li><strong>Respectez exactement</strong> les noms des départements et années (voir onglet "Instructions" du modèle)</li>
+              <li><strong>Uploadez le fichier complété</strong></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Single Student Creation -->
+      <div class="card shadow-sm border-0 mb-3">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="bi bi-person-plus me-2"></i>Créer un étudiant
+          </h5>
+        </div>
+        <div class="card-body">
+          <form method="post" action="{% url 'gestion:etudiant_create' %}">
+            {% csrf_token %}
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Nom <span class="text-danger">*</span></label>
+                <input class="form-control" name="nom" placeholder="Nom" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Prénom <span class="text-danger">*</span></label>
+                <input class="form-control" name="prenom" placeholder="Prénom" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" name="email" placeholder="example@email.com" required>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Téléphone</label>
+                <input class="form-control" name="telephone" placeholder="+222 12345678">
+              </div>
+              
+              <div class="col-md-3">
+                <label class="form-label small fw-semibold">Niveau</label>
+                <input class="form-control" name="niveau" placeholder="Ex: Licence 3">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-semibold">Mot de passe <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" name="mot_de_pass" placeholder="********" required>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-semibold">Département <span class="text-danger">*</span></label>
+                <select class="form-select" name="id_departement" required>
+                  <option value="">Choisir...</option>
+                  {% for dept in departements %}
+                    <option value="{{ dept.id_departement }}">
+                      {{ dept.nom_departement }} ({{ dept.niveau_libelle }})
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-2">
+                <label class="form-label small fw-semibold">Année <span class="text-danger">*</span></label>
+                <select class="form-select" name="id_annee" required>
+                  <option value="">Choisir...</option>
+                  {% for annee in annees %}
+                    <option value="{{ annee.id_annee }}" {% if annee.active %}selected{% endif %}>
+                      {{ annee.libelle }}{% if annee.active %} ✓{% endif %}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-success px-4">
+                  <i class="bi bi-plus-circle me-2"></i>Créer l'étudiant
+                </button>
+                <small class="text-muted ms-3">
+                  <span class="text-danger">*</span> Champs obligatoires
+                </small>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Students List -->
+      <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="mb-0">
+            <i class="bi bi-people me-2"></i>Liste des étudiants ({{ rows|length }})
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>#</th>
+                  <th>Nom</th>
+                  <th>Prénom</th>
+                  <th>Email</th>
+                  <th>Téléphone</th>
+                  <th>Niveau</th>
+                  <th>Département</th>
+                  <th>Année</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in rows %}
+                  <tr>
+                    <td class="text-muted small">{{ r.id_etudiant }}</td>
+                    <td class="fw-semibold">{{ r.nom }}</td>
+                    <td>{{ r.prenom }}</td>
+                    <td>
+                      <i class="bi bi-envelope text-muted me-1"></i>
+                      <small>{{ r.email }}</small>
+                    </td>
+                    <td><small>{{ r.telephone|default:"—" }}</small></td>
+                    <td><small>{{ r.niveau|default:"—" }}</small></td>
+                    <td>
+                      <span class="badge bg-primary-subtle text-primary">
+                        {{ r.departement_nom }}
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge bg-info-subtle text-info">
+                        {{ r.annee_libelle }}
+                      </span>
+                    </td>
+                    <td class="text-end">
+                      <div class="btn-group btn-group-sm">
+                        <a class="btn btn-outline-primary"
+                           href="{% url 'gestion:etudiant_update' r.id_etudiant %}"
+                           title="Modifier">
+                          <i class="bi bi-pencil"></i>
+                        </a>
+                        <a class="btn btn-outline-danger"
+                           href="{% url 'gestion:etudiant_delete' r.id_etudiant %}"
+                           onclick="return confirm('Supprimer {{ r.nom }} {{ r.prenom }} ?');"
+                           title="Supprimer">
+                          <i class="bi bi-trash"></i>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="10" class="text-center text-muted py-5">
+                      <i class="bi bi-inbox fs-1 d-block mb-2 text-muted opacity-50"></i>
+                      <p class="mb-0">Aucun étudiant trouvé</p>
+                      {% if q %}
+                        <small>Essayez avec d'autres critères de recherche</small>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
-<!-- CREATE -->
-<form method="post" action="{% url 'gestion:etudiant_create' %}" class="card card-body mb-3">
-  {% csrf_token %}
-  <div class="row g-2">
-    <div class="col-md-3"><input class="form-control" name="nom" placeholder="Nom" required></div>
-    <div class="col-md-3"><input class="form-control" name="prenom" placeholder="Prénom" required></div>
-    <div class="col-md-3"><input class="form-control" name="email" placeholder="Email" required></div>
-    <div class="col-md-2"><input class="form-control" name="mot_de_pass" placeholder="Mot de passe" required></div>
-    <div class="col-md-1"><button class="btn btn-primary w-100">+</button></div>
-  </div>
-</form>
-
-<!-- LIST -->
-<div class="card">
-  <div class="card-body">
-    <table class="table table-hover align-middle">
-      <thead>
-        <tr><th>#</th><th>Nom</th><th>Prénom</th><th>Email</th><th class="text-end">Actions</th></tr>
-      </thead>
-      <tbody>
-        {% for r in rows %}
-          <tr>
-            <td>{{ r.id_etudiant }}</td>
-            <td>{{ r.nom }}</td>
-            <td>{{ r.prenom }}</td>
-            <td>{{ r.email }}</td>
-            <td class="text-end">
-              <a class="btn btn-sm btn-outline-primary"
-                 href="{% url 'gestion:etudiant_update' r.id_etudiant %}">
-                Modifier
-              </a>
-              <a class="btn btn-sm btn-outline-danger"
-                 href="{% url 'gestion:etudiant_delete' r.id_etudiant %}"
-                 onclick="return confirm('Supprimer cet étudiant ?');">
-                Supprimer
-              </a>
-            </td>
-          </tr>
-        {% empty %}
-          <tr><td colspan="5" class="text-center text-muted">Aucun étudiant</td></tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-</div>
+<script>
+  // File input validation
+  document.getElementById('excelFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['xlsx', 'xls'].includes(ext)) {
+        alert('⚠️ Veuillez sélectionner un fichier Excel (.xlsx ou .xls)');
+        e.target.value = '';
+      } else {
+        console.log('✅ Fichier valide:', file.name);
+      }
+    }
+  });
+  
+  // Form submission confirmation for bulk upload
+  document.getElementById('bulkUploadForm').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('excelFileInput');
+    if (!fileInput.files.length) {
+      e.preventDefault();
+      alert('⚠️ Veuillez sélectionner un fichier Excel');
+      return false;
+    }
+  });
+</script>
 {% endblock %}

@@ -134,16 +134,15 @@ CREATE VIEW isms.v_jury_composition_resume AS
 SELECT
   j.id_jury,
   j.nom_jury,
-  COUNT(cj.id_responsable) AS nb_membres,
-  SUM(CASE WHEN ro.code = 'PRESIDENT'  THEN 1 ELSE 0 END) AS nb_presidents,
-  SUM(CASE WHEN ro.code = 'RAPPORTEUR' THEN 1 ELSE 0 END) AS nb_rapporteurs
+  COUNT(DISTINCT cj.id_responsable) AS nb_membres,
+  COUNT(DISTINCT CASE WHEN ro.code = 'PRESIDENT' THEN cj.id_responsable END) AS nb_presidents,
+  COUNT(DISTINCT CASE WHEN ro.code = 'RAPPORTEUR' THEN cj.id_responsable END) AS nb_rapporteurs
 FROM isms.jury j
 LEFT JOIN isms.composition_jury cj ON cj.id_jury = j.id_jury
-LEFT JOIN isms.responsable r ON r.id_responsable = cj.id_responsable
-LEFT JOIN isms.role ro ON ro.id_role = r.id_role
+LEFT JOIN isms.responsable_role rr ON rr.id_responsable = cj.id_responsable
+LEFT JOIN isms.role ro ON ro.id_role = rr.id_role
 GROUP BY j.id_jury, j.nom_jury
 ORDER BY j.nom_jury;
-
 
 -- ---------------------------------------------------------
 -- 7) Vue matérialisée (statistiques rapides par département et année)

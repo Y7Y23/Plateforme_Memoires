@@ -1,0 +1,98 @@
+{% extends "base_admin.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="mb-0">Membres du jury</h3>
+    <div class="text-muted">Jury : <strong>{{ jury.nom_jury }}</strong> (ID #{{ jury.id_jury }})</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a href="{% url 'gestion:jury_list' %}" class="btn btn-outline-secondary">Retour</a>
+
+    {% if membres %}
+    <form method="post" action="{% url 'gestion:composition_jury_clear' jury.id_jury %}">
+      {% csrf_token %}
+      <button class="btn btn-outline-danger"
+              onclick="return confirm('Retirer TOUS les membres de ce jury ?');">
+        Tout retirer
+      </button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-8">
+    <input type="text" name="q" value="{{ q }}" class="form-control"
+           placeholder="Rechercher (nom, email, rôle...)">
+  </div>
+  <div class="col-md-4 d-flex gap-2">
+    <button class="btn btn-outline-primary w-100" type="submit">Filtrer</button>
+    <a class="btn btn-outline-secondary w-100" href="{% url 'gestion:composition_jury_list' jury.id_jury %}">Reset</a>
+  </div>
+</form>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="post" action="{% url 'gestion:composition_jury_add' jury.id_jury %}" class="row g-2 align-items-end">
+      {% csrf_token %}
+      <div class="col-md-9">
+        <label class="form-label">Ajouter un membre</label>
+        <select name="id_responsable" class="form-select" required>
+          <option value="">-- Choisir --</option>
+          {% for c in candidates %}
+            <option value="{{ c.id_responsable }}">
+              {{ c.nom }} {{ c.prenom }} — {{ c.email }} ({{ c.role_code }})
+            </option>
+          {% endfor %}
+        </select>
+        <div class="form-text">Liste des responsables non encore présents dans ce jury.</div>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary w-100" type="submit">Ajouter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-striped table-hover align-middle">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Rôle</th>
+        <th class="text-end">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in membres %}
+      <tr>
+        <td>{{ m.id_responsable }}</td>
+        <td>{{ m.nom }} {{ m.prenom }}</td>
+        <td>{{ m.email }}</td>
+        <td>
+          <span class="badge bg-light text-dark">{{ m.role_code }}</span>
+          {% if m.role_libelle %}<small class="text-muted ms-2">{{ m.role_libelle }}</small>{% endif %}
+        </td>
+        <td class="text-end">
+          <form method="post" action="{% url 'gestion:composition_jury_remove' jury.id_jury m.id_responsable %}" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger"
+                    onclick="return confirm('Retirer ce membre du jury ?');">
+              Retirer
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center text-muted py-4">Aucun membre dans ce jury.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

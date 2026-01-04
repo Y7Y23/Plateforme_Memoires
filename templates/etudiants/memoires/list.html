@@ -1,0 +1,50 @@
+{% extends "base_etudiant.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between mb-3">
+  <h3>Mes mémoires</h3>
+  <a href="{% url 'etudiant:memoire_create' %}" class="btn btn-primary">+ Déposer</a>
+</div>
+
+<form class="row g-2 mb-3">
+  <div class="col-md-8">
+    <input class="form-control" name="q" value="{{ q }}" placeholder="Recherche titre">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="statut">
+      <option value="">-- Statut --</option>
+      {% for s in STATUTS %}
+        <option value="{{ s }}" {% if s == statut %}selected{% endif %}>{{ s }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-1 d-grid">
+    <button class="btn btn-outline-primary">OK</button>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Titre</th><th>Type</th><th>Statut</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in memoires %}
+    <tr>
+      <td>{{ m.titre }}</td>
+      <td>{{ m.type }}</td>
+      <td>{{ m.statut }}</td>
+      <td>
+        <a href="{% url 'etudiant:memoire_detail' m.id_memoire %}" class="btn btn-sm btn-outline-secondary">
+          Détails
+        </a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="text-muted">Aucun mémoire.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

@@ -22,6 +22,7 @@ DELETE FROM departement;
 DELETE FROM niveau;
 DELETE FROM salle;
 DELETE FROM role;
+DELETE FROM responsable_role;
 DELETE FROM annee_universitaire;
 
 -- ---------------------------------------------------------
@@ -63,36 +64,37 @@ INSERT INTO role(code, libelle) VALUES
 -- ---------------------------------------------------------
 -- 3) Responsables (jury + encadrants)
 -- ---------------------------------------------------------
-INSERT INTO responsable(nom, prenom, email, mot_de_pass, id_role) VALUES
-('Admin', 'Root', 'admin@isms.local', 'admin123',
- (SELECT id_role FROM role WHERE code='ADMIN')),
+-- Insertion responsables (SANS id_role)
+INSERT INTO responsable(nom, prenom, email, mot_de_pass, is_admin) VALUES
+('Admin', 'Root', 'admin@isms.local', 'admin123', TRUE),
+('El Amrani', 'Hassan', 'president@isms.local', 'pass123', FALSE),
+('Bennani', 'Sara', 'rapporteur@isms.local', 'pass123', FALSE),
+('Fathi', 'Youssef', 'membre1@isms.local', 'pass123', FALSE),
+('Khaldi', 'Imane', 'encadrant1@isms.local', 'pass123', FALSE),
+('Zaki', 'Nabil', 'encadrant2@isms.local', 'pass123', FALSE);
 
-('El Amrani', 'Hassan', 'president@isms.local', 'pass123',
- (SELECT id_role FROM role WHERE code='PRESIDENT')),
-
-('Bennani', 'Sara', 'rapporteur@isms.local', 'pass123',
- (SELECT id_role FROM role WHERE code='RAPPORTEUR')),
-
-('Fathi', 'Youssef', 'membre1@isms.local', 'pass123',
- (SELECT id_role FROM role WHERE code='MEMBRE_JURY')),
-
-('Khaldi', 'Imane', 'encadrant1@isms.local', 'pass123',
- (SELECT id_role FROM role WHERE code='ENCADRANT')),
-
-('Zaki', 'Nabil', 'encadrant2@isms.local', 'pass123',
- (SELECT id_role FROM role WHERE code='ENCADRANT'));
-
+-- Attribution des rôles via responsable_role
+INSERT INTO responsable_role(id_responsable, id_role)
+SELECT r.id_responsable, ro.id_role
+FROM responsable r
+CROSS JOIN role ro
+WHERE (r.email = 'admin@isms.local' AND ro.code = 'ADMIN')
+   OR (r.email = 'president@isms.local' AND ro.code = 'PRESIDENT')
+   OR (r.email = 'rapporteur@isms.local' AND ro.code = 'RAPPORTEUR')
+   OR (r.email = 'membre1@isms.local' AND ro.code = 'MEMBRE_JURY')
+   OR (r.email = 'encadrant1@isms.local' AND ro.code = 'ENCADRANT')
+   OR (r.email = 'encadrant2@isms.local' AND ro.code = 'ENCADRANT');
 -- ---------------------------------------------------------
 -- 4) Étudiants
 -- ---------------------------------------------------------
-INSERT INTO etudiant(nom, prenom, email, telephone, filiere, niveau, mot_de_pass, id_departement, id_annee)
+INSERT INTO etudiant(nom, prenom, email, telephone,niveau, mot_de_pass, id_departement, id_annee)
 VALUES
-('Alaoui', 'Yassine', 'yassine.alaoui@etudiant.local', '0600000001', 'Systèmes d''Information', 'Master',
+('Alaoui', 'Yassine', 'yassine.alaoui@etudiant.local', '0600000001',  'Master',
  'pass123',
  (SELECT id_departement FROM departement WHERE nom_departement='Informatique'),
  (SELECT id_annee FROM annee_universitaire WHERE libelle='2024-2025')),
 
-('Haddad', 'Meryem', 'meryem.haddad@etudiant.local', '0600000002', 'Management', 'Licence',
+('Haddad', 'Meryem', 'meryem.haddad@etudiant.local', '0600000002', 'Licence',
  'pass123',
  (SELECT id_departement FROM departement WHERE nom_departement='Gestion'),
  (SELECT id_annee FROM annee_universitaire WHERE libelle='2024-2025'));

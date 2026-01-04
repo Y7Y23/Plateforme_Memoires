@@ -1,0 +1,30 @@
+{% extends "base_responsable.html" %}
+{% block title %}Dashboard Encadrant{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="mb-0">Dashboard — Encadrant</h3>
+    <div class="text-muted">Année active : {{ request.session.annee_libelle }}</div>
+  </div>
+  <a class="btn btn-primary" href="{% url 'responsable:memoire_list' %}">Mes mémoires</a>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted">Total</div><div class="h3 mb-0">{{ nb_memoires }}</div>
+  </div></div></div>
+
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted">En attente</div><div class="h3 mb-0">{{ nb_attente }}</div>
+  </div></div></div>
+
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted">Validés</div><div class="h3 mb-0">{{ nb_valides }}</div>
+  </div></div></div>
+
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted">Refusés</div><div class="h3 mb-0">{{ nb_refuses }}</div>
+  </div></div></div>
+</div>
+{% endblock %}

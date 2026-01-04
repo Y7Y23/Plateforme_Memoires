@@ -1,0 +1,35 @@
+{% extends "base_etudiant.html" %}
+{% block content %}
+
+<h3>{{ mem.titre }}</h3>
+
+<p><strong>Type :</strong> {{ mem.type }}</p>
+<p><strong>Statut :</strong> <span class="badge bg-info">{{ mem.statut }}</span></p>
+
+{% if mem.fichier_pdf %}
+<p>
+  <a href="{{ MEDIA_URL }}{{ mem.fichier_pdf }}" target="_blank" class="btn btn-outline-primary">
+    Voir le PDF
+  </a>
+</p>
+{% endif %}
+
+<hr>
+
+<h5>Encadrement</h5>
+<ul>
+  {% for e in encadreurs %}
+    <li>{{ e.nom }} {{ e.prenom }} ({{ e.encadrement }})</li>
+  {% empty %}
+    <li class="text-muted">Non affecté</li>
+  {% endfor %}
+</ul>
+
+{% if soutenance %}
+<hr>
+<h5>Soutenance</h5>
+<p>{{ soutenance.date_ }} {{ soutenance.heure }} — {{ soutenance.nom_salle }}</p>
+<p>Jury : {{ soutenance.nom_jury }}</p>
+{% endif %}
+
+{% endblock %}

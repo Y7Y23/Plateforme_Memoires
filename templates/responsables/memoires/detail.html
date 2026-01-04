@@ -1,0 +1,39 @@
+{% extends "base_responsable.html" %}
+{% block title %}Détail mémoire{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="mb-0">{{ memoire.titre }}</h3>
+    <div class="text-muted">{{ memoire.type }} — Statut : {{ memoire.statut }}</div>
+  </div>
+  <a class="btn btn-outline-secondary" href="{% url 'responsable:memoire_list' %}">Retour</a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <p><strong>Étudiant :</strong> {{ memoire.etu_nom }} {{ memoire.etu_prenom }} ({{ memoire.etu_email }})</p>
+    <p><strong>Encadrement :</strong> {{ memoire.encadrement }}</p>
+
+    <p><strong>Description :</strong><br>{{ memoire.description|default:"-" }}</p>
+
+    {% if memoire.fichier_pdf %}
+      <p class="mb-2"><strong>PDF :</strong>
+        {# Si fichier_pdf stocke un chemin MEDIA (ex: memoires/x.pdf) #}
+        <a href="{{ MEDIA_URL }}{{ memoire.fichier_pdf }}" target="_blank">Ouvrir le PDF</a>
+      </p>
+      <small class="text-muted">Chemin: {{ memoire.fichier_pdf }}</small>
+    {% endif %}
+
+    <hr>
+
+    {% if request.session.role_code == "ENCADRANT" or request.session.role_code == "ADMIN" %}
+    <form method="post" action="{% url 'responsable:memoire_decision' memoire.id_memoire %}">
+      {% csrf_token %}
+      <button class="btn btn-success" name="decision" value="VALIDE" type="submit">Valider</button>
+      <button class="btn btn-danger" name="decision" value="REFUSE" type="submit">Refuser</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
